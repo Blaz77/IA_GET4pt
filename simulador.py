@@ -18,7 +18,7 @@ class Simulador(object):
 			return False
 		else:
 			dado.lanzar_dados(atacante,atacado)
-			return ganaste_combate_aleatorio(atacante - dado.ejercitos_perdidos_atacante(),atacado - dado.ejercitos_perdidos_atacado(), minatk, maxdef)
+			return self.ataque_individual(dado, atacante - dado.ejercitos_perdidos_atacante(),atacado - dado.ejercitos_perdidos_atacado(), minatk, maxdef)
 
 	def chances_ataque(self, dado, atacante, atacado, minatk = 1, maxdef = 0):
 		""" Corre mil veces la funcion ataque_individual, y 
@@ -28,7 +28,7 @@ class Simulador(object):
 		total = 1000
 		ganados = 0
 		for i in range(1000):
-			gane_combate = ganaste_combate_aleatorio(atacante, atacado, minatk, maxdef)
+			gane_combate = self.ataque_individual(dado, atacante, atacado, minatk, maxdef)
 			if gane_combate:
 				ganados += 1
-			return ganados*1.0/1000
+		return ganados*1.0/1000
