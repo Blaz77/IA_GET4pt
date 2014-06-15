@@ -1,10 +1,10 @@
 #from random import randrange,randint
 class Simulador(object):
     """Motores de simulacion de probabilidades para situaciones aleatorias"""
-    def __init__(probabilidad = 0):
+    def __init__(self, probabilidad = 0):
         self.probabilidad = probabilidad
         
-    def ataque_individual(dado, atacante, atacado, minatk = 1, maxdef = 0):
+    def ataque_individual(self, dado, atacante, atacado, minatk = 1, maxdef = 0):
         """ Recibe un dado, la cantidad de ejercitos de cada 
         lado, un minimo de ejercitos a conservar, y un minimo 
         de ejercitos enemigos a destruir. Devuelve True si 
@@ -20,7 +20,7 @@ class Simulador(object):
 	        dado.lanzar_dados(atacante,atacado)
 	        return ganaste_combate_aleatorio(atacante - dado.ejercitos_perdidos_atacante(),atacado - dado.ejercitos_perdidos_atacado(), minatk, maxdef)
 
-    def chances_ataque(dado, atacante, atacado, minatk = 1, maxdef = 0):
+    def chances_ataque(self, dado, atacante, atacado, minatk = 1, maxdef = 0):
         """ Corre mil veces la funcion ataque_individual, y 
         devuelve la probabilidad (estimada) de victoria con 
         esos ejercitos y limites"""
