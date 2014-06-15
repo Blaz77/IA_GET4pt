@@ -35,8 +35,11 @@ def csv_a_diccionario(nombre_archivo):
         finally:
                 archivo.close()
 
-def agregar(archivo, diccionario_chances):
-        abierto = open(archivo, "a")
-        for chance in diccionario_chances:
-                abierto.write(str(chance[0])+","+str(chance[1])+","+str(diccionario_chances[chance])+linesep)
+def agregar_probabilidad(archivo, atacante, atacado, probabilidad):
+        try:
+                abierto = open(archivo, "a")
+        except:
+                raise RuntimeError("Error al abrir el archivo: No existe o esta siendo leido por otro")
+        linea = ",".join(str(atacante),str(atacado),str(probabilidad))
+        abierto.write(linea+linesep)
         abierto.close()
