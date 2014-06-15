@@ -24,13 +24,13 @@ class Simulador(object):
         """ Corre mil veces la funcion ataque_individual, y 
         devuelve la probabilidad (estimada) de victoria con 
         esos ejercitos y limites"""
-            total = 1000
-            ganados = 0
-            for i in range(1000):
-            	gane_combate = ganaste_combate_aleatorio(atacante, atacado, minatk, maxdef)
-            	if gane_combate:
-            	    ganados += 1
-            return ganados*1.0/1000
+   		total = 1000
+        ganados = 0
+	    for i in range(1000):
+            gane_combate = ganaste_combate_aleatorio(atacante, atacado, minatk, maxdef)
+            if gane_combate:
+				ganados += 1
+			return ganados*1.0/1000
 
         
         
