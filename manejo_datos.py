@@ -29,7 +29,7 @@ def crear_base(nombre_archivo):
                 diccionario = {}
                 archivo_csv.next()
                 for linea in archivo_csv:
-                        diccionario[(desencadenar(linea[0]),desencadenar(linea[1]))] = desencadenar(linea[2])
+                        if linea: diccionario[(desencadenar(linea[0]),desencadenar(linea[1]))] = desencadenar(linea[2])
                 return diccionario
         except:
                 raise RuntimeError()
