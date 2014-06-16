@@ -7,8 +7,16 @@ class Probabilidad(object):
 		self.ultima_probabilidad = ultima_probabilidad
 	
 	def ataque(self, atacante, atacado, minatk = 1,
-                   maxdef = 0, nombre_archivo = "./bases/base.csv",
-                   nombre_archivo2 = "./bases/base_condicional.csv"):
+		   maxdef = 0, nombre_archivo = "./bases/base.csv",
+		   nombre_archivo2 = "./bases/base_condicional.csv"):
+		
+		if minatk == 1 and maxdef == 0:
+			base = crear_base(nombre_archivo)
+		else:
+			base = crear_base_condicional(nombre_archivo2)
+		return self._ataque(atacante, atacado, minatk, maxdef, base, nombre_archivo, nombre_archivo2)
+	
+	def _ataque(self, atacante, atacado, minatk, maxdef, base, nombre_archivo, nombre_archivo2):
                 
 		""" Devuelve la probabilidad real de reducir
                 los ejercitos enemigos a maxdef atacando
@@ -28,16 +36,13 @@ class Probabilidad(object):
 			return 0
 		
 		# Hay una base de datos para probabilidades con minatk=0 y maxdef=1, y otra para los demas casos.
-		if minatk == 1 and maxdef == 0:
-			base = crear_base(nombre_archivo)
-			if (atacante, atacado) in base:
+		# Hay una base de datos para probabilidades con minatk=0 y maxdef=1, y otra para los demas casos.
+		if (atacante, atacado) in base:
+			if minatk == 1 and maxdef == 0:
 				self.ultima_probabilidad = base[(atacante, atacado)]
 				return self.ultima_probabilidad
-		else:
-			base = crear_base_condicional(nombre_archivo2)
-			if (atacante, atacado) in base and (minatk, maxdef) in base[(atacante, atacado)]:
-				self.ultima_probabilidad = base[(atacante, atacado)][(minatk, maxdef)]
-				return self.ultima_probabilidad
+			self.ultima_probabilidad = base[(atacante, atacado)][(minatk, maxdef)]
+			return self.ultima_probabilidad
 
 		#-RECURSIVIDAD-
 		# En lugar de generarse una pila de datos simple en la PC,
@@ -47,10 +52,10 @@ class Probabilidad(object):
 		atacadoreal = min(atacado, 3)
 		chance = CHANCES[(atacantereal, atacadoreal)]
 		chancekeys = sorted(chance.keys())
-		self.ultima_probabilidad = (chance[chancekeys[0]] * self.ataque(atacante + chancekeys[0][0], atacado + chancekeys[0][1], minatk, maxdef, nombre_archivo, nombre_archivo2) +
-					    chance[chancekeys[1]] * self.ataque(atacante + chancekeys[1][0], atacado + chancekeys[1][1], minatk, maxdef, nombre_archivo, nombre_archivo2) +
-					    chance[chancekeys[2]] * self.ataque(atacante + chancekeys[2][0], atacado + chancekeys[2][1], minatk, maxdef, nombre_archivo, nombre_archivo2) +
-					    chance[chancekeys[3]] * self.ataque(atacante + chancekeys[3][0], atacado + chancekeys[3][1], minatk, maxdef, nombre_archivo, nombre_archivo2))
+		self.ultima_probabilidad = (chance[chancekeys[0]] * self._ataque(atacante + chancekeys[0][0], atacado + chancekeys[0][1], minatk, maxdef, base, nombre_archivo, nombre_archivo2) +
+					    chance[chancekeys[1]] * self._ataque(atacante + chancekeys[1][0], atacado + chancekeys[1][1], minatk, maxdef, base, nombre_archivo, nombre_archivo2) +
+					    chance[chancekeys[2]] * self._ataque(atacante + chancekeys[2][0], atacado + chancekeys[2][1], minatk, maxdef, base, nombre_archivo, nombre_archivo2) +
+					    chance[chancekeys[3]] * self._ataque(atacante + chancekeys[3][0], atacado + chancekeys[3][1], minatk, maxdef, base, nombre_archivo, nombre_archivo2))
 
 		#Aqui, luego de realizar los calculos, agrega a la base de datos los resultados nuevos.
 		if minatk == 1 and maxdef == 0:
