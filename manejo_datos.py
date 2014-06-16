@@ -1,7 +1,5 @@
-from os import linesep
 import csv
 from constantes_probabilidad import *
-
 def desencadenar(valor):
         ''' Recibe una cadena numerica y la convierte a
         int o float, segun si es un numero entero o no,
@@ -15,7 +13,7 @@ def desencadenar(valor):
         except:
                 raise ValueError("Recibio un valor no numerico!")
 
-def crear_base(nombre_archivo):
+def crear_base(nombre_archivo = "./bases/base.csv"):
         ''' Convierte los datos de nuestro archivo de 
         probabilidades calculadas a un diccionario y 
         lo devuelve.
@@ -26,26 +24,32 @@ def crear_base(nombre_archivo):
         except IOError:
                 raise RuntimeError("Error al abrir el archivo de datos")
         try:
-                diccionario = {}
+                base = {}
                 archivo_csv.next()
                 for linea in archivo_csv:
-                        if linea: diccionario[(desencadenar(linea[0]),desencadenar(linea[1]))] = desencadenar(linea[2])
-                return diccionario
+                        atacante = desencadenar(linea[0])
+                        atacado = desencadenar(linea[1])
+                        probabilidad = desencadenar(linea[2])
+                        if linea: actualizar_base(base, atacante, atacado, probabilidad)
+                return base
         except:
-                raise RuntimeError()
+                raise RuntimeError("El csv esta todo mal")
         finally:
                 archivo.close()
 
-def agregar_proba(nombre_archivo, atacante, atacado, probabilidad):
+def agregar_proba(nombre_archivo, atacante, atacado, probabilidad, escritura = "a"):
         try:
-                archivo = open(nombre_archivo, "a")
+                archivo = open(nombre_archivo, escritura)
+                escritor_csv = csv.writer(archivo)
         except:
                 raise RuntimeError("Error al abrir el archivo: No existe o esta siendo leido por otro")
-        linea = ",".join((str(atacante),str(atacado),str(probabilidad)))
-        archivo.write(linea+linesep)
+        escritor_csv.writerow([atacante, atacado, probabilidad])
         archivo.close()
 
-def crear_base_condicional(nombre_archivo):
+def actualizar_base(base, atacante, atacado, probabilidad):
+        base[(atacante, atacado)] = probabilidad
+
+def crear_base_condicional(nombre_archivo = "./bases/base_condicional.csv"):
         ''' Convierte los datos de nuestro archivo de 
         probabilidades calculadas a un diccionario y 
         lo devuelve.
@@ -53,10 +57,11 @@ def crear_base_condicional(nombre_archivo):
         try:
                 archivo = open(nombre_archivo)
                 archivo_csv = csv.reader(archivo)
+        
         except IOError:
                 raise RuntimeError("Error al abrir el archivo de datos")
         try:
-                diccionario = {}
+                base = {}
                 archivo_csv.next()
                 for linea in archivo_csv:
                         atacante = desencadenar(linea[0])
@@ -64,20 +69,35 @@ def crear_base_condicional(nombre_archivo):
                         minatk = desencadenar(linea[2])
                         maxdef = desencadenar(linea[3])
                         probabilidad = desencadenar(linea[4])
-                        if (atacante, atacado) not in diccionario:
-                                diccionario[(atacante, atacado)] = {}
-                        diccionario[(atacante,atacado)].update({(minatk,maxdef):probabilidad})
-                return diccionario
+                        if linea: actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabilidad)
+                return base
         except:
                 raise RuntimeError()
         finally:
                 archivo.close()
 
-def agregar_proba_condicional(nombre_archivo, atacante, atacado, minatk, maxdef, probabilidad):
+def agregar_proba_condicional(nombre_archivo, atacante, atacado, minatk, maxdef, probabilidad, escritura = "a"):
         try:
-                archivo = open(nombre_archivo, "a")
+                archivo = open(nombre_archivo, escritura)
+                escritor_csv = csv.writer(archivo)
         except:
                 raise RuntimeError("Error al abrir el archivo: No existe o esta siendo leido por otro")
-        linea = ",".join((str(atacante), str(atacado), str(minatk), str(maxdef), str(probabilidad)))
-        archivo.write(linea+linesep)
+        escritor_csv.writerow([atacante, atacado, minatk, maxdef, probabilidad])
         archivo.close()
+
+def actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabilidad):
+        if (atacante, atacado) not in base:
+                base[(atacante, atacado)] = {}
+        base[(atacante, atacado)].update({(minatk, maxdef): probabilidad})
+
+def _crear_backup(nombre_archivo = "./bases/base_BACKUP.csv"):
+        agregar_proba(nombre_archivo, "Atacante", "Atacado", "Probabilidad", "w")
+
+def _crear_backup_condicional(nombre_archivo = "./bases/base_condicional_BACKUP.csv"):
+        agregar_proba_condicional(nombre_archivo, "Atacante", "Atacado", "Minatk", "Maxdef", "Probabilidad", "w")
+
+def _flushear_archivo():
+        _crear_backup("./bases/base.csv")
+
+def _flushear_archivo_condicional():
+        _crear_backup_condicional("./bases/base_condicional.csv")
