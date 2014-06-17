@@ -28,7 +28,7 @@ class Probabilidad(object):
 		if atacante <= minatk:
 			return 0
 
-		# Hay una base de datos para probabilidades con minatk=0 y maxdef=1, y otra para los demas casos.
+		# Hay una base de datos para probabilidades con minatk=1 y maxdef=0, y otra para los demas casos.
 		if minatk == 1 and maxdef == 0:
 			base = base1
 		else:
@@ -55,7 +55,7 @@ class Probabilidad(object):
 					    chance[chancekeys[2]] * self.ataque(atacante + chancekeys[2][0], atacado + chancekeys[2][1], minatk, maxdef, base1, base2) +
 					    chance[chancekeys[3]] * self.ataque(atacante + chancekeys[3][0], atacado + chancekeys[3][1], minatk, maxdef, base1, base2))
 
-		#Aqui, luego de realizar los calculos, agrega a la base de datos los resultados nuevos.
+		# Aqui, luego de realizar los calculos, agrega a la base de datos los resultados nuevos.
 		if minatk == 1 and maxdef == 0:
 			actualizar_base(base, atacante, atacado, self.ultima_probabilidad)
 			agregar_proba("./bases/base.csv", atacante, atacado, self.ultima_probabilidad)
@@ -63,13 +63,13 @@ class Probabilidad(object):
 			actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
 			agregar_proba_condicional("./bases/base_condicional.csv", atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
 		
-		#Devuelvo el elemento aqui mismo, quedando igual guardado en el atributo hasta un nuevo calculo.
+		# Devuelvo el elemento aqui mismo, quedando igual guardado en el atributo hasta un nuevo calculo.
 		return self.ultima_probabilidad
 		
 	def ver_ultimo_calculo(self):
-		"""Devuelve el resultado del ultimo calculo de probabilidad.
+		""" Devuelve el resultado del ultimo calculo de probabilidad.
 		"""
 		return self.ultima_probabilidad
 
-#Este de aca esta para hacer pruebas en terminal mas rapido, despues lo borro.
+# Este de aca esta para hacer pruebas en terminal mas rapido, despues lo borro.
 proba = Probabilidad()

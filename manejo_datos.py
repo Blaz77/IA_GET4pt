@@ -1,5 +1,14 @@
 import csv
 from constantes_probabilidad import *
+
+# Campos de las bases de datos
+ATACANTE = 0
+ATACADO = 1
+MINATK = 2
+MAXDEF = 3
+PROBA_BASICA = 2
+PROBA_CONDICIONAL = 4
+
 def desencadenar(valor):
         ''' Recibe una cadena numerica y la convierte a
         int o float, segun si es un numero entero o no,
@@ -19,7 +28,7 @@ def crear_base(nombre_archivo = "./bases/base.csv"):
         lo devuelve.
         '''
         try:
-                archivo = open(nombre_archivo)
+                archivo = open(nombre_archivo, "r")
                 archivo_csv = csv.reader(archivo)
         except IOError:
                 raise RuntimeError("Error al abrir el archivo de datos")
@@ -27,9 +36,9 @@ def crear_base(nombre_archivo = "./bases/base.csv"):
                 base = {}
                 archivo_csv.next()
                 for linea in archivo_csv:
-                        atacante = desencadenar(linea[0])
-                        atacado = desencadenar(linea[1])
-                        probabilidad = desencadenar(linea[2])
+                        atacante = desencadenar(linea[ATACANTE])
+                        atacado = desencadenar(linea[ATACADO])
+                        probabilidad = desencadenar(linea[PROBA_BASICA])
                         if linea: actualizar_base(base, atacante, atacado, probabilidad)
                 return base
         except:
@@ -57,18 +66,18 @@ def crear_base_condicional(nombre_archivo = "./bases/base_condicional.csv"):
         try:
                 archivo = open(nombre_archivo)
                 archivo_csv = csv.reader(archivo)
-        
         except IOError:
                 raise RuntimeError("Error al abrir el archivo de datos")
+		
         try:
                 base = {}
                 archivo_csv.next()
                 for linea in archivo_csv:
-                        atacante = desencadenar(linea[0])
-                        atacado = desencadenar(linea[1])
-                        minatk = desencadenar(linea[2])
-                        maxdef = desencadenar(linea[3])
-                        probabilidad = desencadenar(linea[4])
+                        atacante = desencadenar(linea[ATACANTE])
+                        atacado = desencadenar(linea[ATACADO])
+                        minatk = desencadenar(linea[MINATK])
+                        maxdef = desencadenar(linea[MAXDEF])
+                        probabilidad = desencadenar(linea[PROBA_CONDICIONAL])
                         if linea: actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabilidad)
                 return base
         except:

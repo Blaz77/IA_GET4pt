@@ -7,35 +7,33 @@ class Simulador(object):
 		self.ultima_simulacion = ultima_simulacion
 		self.dado = Dados()
 	
-	def ataque_individual(self, atacante, atacado, minatk = 1, mindef = 0): 
-		""" Recibe un dado, la cantidad de ejercitos de 
-		cada lado, un minimo de ejercitos a conservar, 
-		y un minimo de ejercitos enemigos a destruir. 
+	def ataque_individual(self, atacante, atacado, minatk = 1, maxdef = 0): 
+		""" Recibe la cantidad de ejercitos de cada lado, 
+		un minimo de ejercitos a conservar, y la cantidad 
+		tolerada de ejercitos enemigos sobrevivientes. 
 		Devuelve True si consigue destruir el minimo de
 		ejercitos enemigos o False si no lo logra para 
 		cuando le quedan igual o menos ejercitos que el 
-		minimo.
+		minimo propio.
 		"""
-		# Para este tipo de funciones la recursividad no es muy buena, ya que el
-		# regreso no se aprovecha. Si llega a funcionar lento seria bueno modificarla
-		if atacado <= mindef:
+		if atacado <= maxdef:
 			return True
 		elif atacante <= minatk:
 			return False
 		else:
 			self.dado.lanzar_dados(atacante, atacado)
 			self.ultima_simulacion = self.ataque_individual(atacante - self.dado.ejercitos_perdidos_atacante(), \
-					atacado - self.dado.ejercitos_perdidos_atacado(), minatk, mindef)
+					atacado - self.dado.ejercitos_perdidos_atacado(), minatk, maxdef)
 			return self.ultima_simulacion
 
-	def ataque(self, atacante, atacado, minatk = 1, mindef = 0, precision = 1000):
+	def ataque(self, atacante, atacado, minatk = 1, maxdef = 0, precision = 1000):
 		""" Corre mil veces la funcion ataque_individual, y 
 		devuelve la probabilidad (estimada) de victoria con 
 		esos ejercitos y limites
 		"""
 		ganados = 0
 		for i in xrange(precision):
-			gane_combate = self.ataque_individual(atacante, atacado, minatk, mindef)
+			gane_combate = self.ataque_individual(atacante, atacado, minatk, maxdef)
 			if gane_combate:
 				ganados += 1
 		return ganados*1.0 / precision
