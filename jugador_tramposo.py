@@ -23,7 +23,7 @@ class JugadorTramposo(Jugador):
 		# El camino mas corto entre dos puntos es en linea recta
 		lista_paises = tablero.paises()
 		for pais in lista_paises:
-			if (self.es_enemigo(tablero, pais):
+			if (self.es_enemigo(tablero, pais)):
 				tablero.ocupar_pais(pais, self.color, 3)
 		return None
 	
