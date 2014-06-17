@@ -7,11 +7,6 @@ class Jugador(object):
 		"""Crea un jugador desde un color y un nombre."""
 		self.color = color
 		self.nombre = nombre
-		# Guarda la informacion de las tarjetas que posee el jugador.
-		# Las claves son las tarjetas y los valores True o False, segun
-		# si esta o no cobrada
-		self.tarjetas = {}
-		self.cantidad_canjes = 0
 
 	def ronda_iniciada(self, tablero, ronda, orden_ronda):
 		"""Esta funcion se llama cada vez que comienza una nueva ronda,
@@ -69,7 +64,7 @@ class Jugador(object):
 		estrategia en base a las tarjetas recibidas. No es necesario
 		que realice ninguna accion, y el valor de retorno se ignora.
 		"""
-		self.tarjetas[tarjeta] = False
+		pass
 
 	def tarjeta_usada(self, pais):
 		"""Esta funcion se llama cada vez que el jugador usa una tarjeta
@@ -82,7 +77,7 @@ class Jugador(object):
 		estrategia en base a las tarjetas usadas. No es necesario
 		que realice ninguna accion, y el valor de retorno se ignora.
 		"""
-		self.tarjetas[tarjeta] = True
+		pass
 
 	def tarjetas_canjeadas(self, paises):
 		"""Esta funcion se llama cada vez que el jugador canjea
@@ -97,8 +92,7 @@ class Jugador(object):
 		estrategia en base a las tarjetas canjeadas. No es necesario
 		que realice ninguna accion, y el valor de retorno se ignora.
 		"""
-		# No se para que me podrian servir los paises
-		self.cantidad_canjes += 1
+		pass
 
 	def agregar_ejercitos(self, tablero, cantidad):
 		"""Agregar ejercitos en el tablero.
@@ -113,8 +107,6 @@ class Jugador(object):
 		Devuelve un diccionario {pais: cantidad}. Por ejemplo,
 		{"Zaire": 4, "Italia": 1}.
 		"""
-		# Esto no se si implementarlo o verlo como parte de una clase abstracta.
-		# Esta redefinido en _JugadorEjemplo
 		raise NotImplementedError()
 
 	def reagrupar(self, tablero, paises_ganados_ronda):

@@ -69,3 +69,4 @@ class JugadorInteligente(Jugador):
 		return not (es_frontera or es_orden2 or es_orden3)
 		
 		
+		
