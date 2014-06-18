@@ -57,7 +57,7 @@ class JugadorInteligente(Jugador):
 	
 	def orden_proteccion(self, tablero):
 		""" Devuelve un diccionario con tus paises 
-		de clave y la cantidad de ejercitos que 
+		de clave y la cantidad de paises que 
 		lo protegen (incluyendose) como valor.
 		"""
 		orden_proteccion = {}
