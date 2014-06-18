@@ -7,8 +7,8 @@ A continuación se detallan las características del comportamiento del jugador 
 
 *Reglas generales*
 
-- El jugador debe poder mutar ligeramente de personalidad, para adaptarse al comportamiento y los defectos del otro jugador
-- Debe conocer el nivel de seguridad de cada uno de sus paises, para reforzar los más expuestos
+- El jugador debe poder mutar ligeramente de personalidad, para adaptarse al comportamiento y los defectos del otro jugador (Podriamos hacer que detectase el comportamiento erratico del JugadorSuicida y que lo ignore; podria hacerlo menos eficiente en el torneo)
+- Debe conocer el nivel de seguridad de cada uno de sus paises, para reforzar los más expuestos (LISTO :D)
 - Debe tener en cuenta si el oponente puede agregar más ejercitos que él.
 - Debe cambiar su comportamiento si en la partida hay más de 2 jugadores (Aunque también depende de la agresividad de los oponentes)
 
@@ -46,5 +46,6 @@ Y se repite el proceso hasta que no haya buenas chances para ningún país.
 *Reagrupación*
 
 - Los países más expuestos deben tener mayor cantidad de ejércitos.
--- Los países de orden4 deben quedar con 1 ejercitos
+- - Un pais de orden 2 solo puede ser atacado con 3 ejercitos (2 dados). Con 1 ejercito, sus chances de perder son de 75.4%, con 2, 36.2%, con 3, 12% y con 4, 5%. Deberemos tomar un criterio sobre cuantos dejarle.
+- Los países de orden 4 o superior deben quedar con 1 ejercitos, y reagrupar tratando de enviar sus ejercitos a alguien de menor orden (si puede detectar quien los necesita mas, mejor)
 -- Para el resto...
