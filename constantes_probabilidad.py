@@ -1,18 +1,3 @@
-# Estas chances son la base de los calculos de probabilidad. Fueron obtenidas
-# a traves de simulaciones de 1000 tiradas de dados por cada caso
-
-CHANCES_GANAR = {
-        (2, 1): 15.0/36,
-        (2, 2): 825.0/6**5,
-        (2, 3): 185625.0/6**9,
-        (3, 1): 5865.0/6**5,
-        (3, 2): 16920.0/6**6,
-        (3, 3): 7376160.0/6**10,
-        (4, 1): 9234945.0/6**9,
-        (4, 2): 39663030.0/6**10,
-        (4, 3): 118858725.0/6**11,
-        }
-
 CHANCES = {
     (2, 1): {
         (0, -1): 15.0/36,
