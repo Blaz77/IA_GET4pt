@@ -134,6 +134,17 @@ class Jugador(object):
 		menos."""
 		return []
 
+	def _cambiar(self, reagrupamientos, cambios):
+		"""Plagiado vilmente del TP3 y usado por el metodo 
+		reagrupar, modifica el diccionario de cambios a 
+		partir de la lista de reagrupamientos
+		"""
+		cambios.clear()
+		for migracion in reagrupamientos:
+			cambios[migracion[0]] = cambios.get(migracion[0], 0) - migracion[2]
+			cambios[migracion[1]] = cambios.get(migracion[1], 0) + migracion[2]
+		return cambios
+
 	def __str__(self):
 		"""Representacion de un jugador."""
 		return '%s (%s)' % (self.nombre, NOMBRE_COLORES[self.color])
