@@ -25,12 +25,21 @@ class JugadorInteligente(Jugador):
 	
 	def es_enemigo(self, tablero, pais):
 		return not self.es_mi_pais(tablero, pais)
-
+	
 	def es_frontera(self, tablero, pais):
-		""" Devuelve True si el pais limita con algun pais enemigo.
+		""" Recibe un pais aliado, devuelve 
+		True si limita con algun pais enemigo.
 		"""
 		return self._limita_con(tablero, pais, self.es_enemigo)
-		
+	
+	def es_amenaza(self, tablero, pais):
+		""" Recibe un pais enemigo, devuelve True 
+		si limita con alguno de los paises aliados.
+		"""
+		if es_mi_pais(self, tablero, pais):
+			raise ValueError()
+		return self.limita_con(tablero, pais, self.es_frontera)
+	
 	def es_frontera_unica(self, tablero, pais):
 		""" Devuelve True si el pais es frontera y 
 		no limita con ninguna otra.
@@ -40,33 +49,30 @@ class JugadorInteligente(Jugador):
 			return False
 		return not self._limita_con(tablero, pais, self.es_frontera)
 		
-	def es_orden2(self, tablero, pais):
-		""" Devuelve True si el pais no es frontera pero 
-		es limitrofe con alguna de tus fronteras.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		if es_frontera:
-			return False
-		return self._limita_con(tablero, pais, self.es_frontera)
-	
-	def es_orden3(self, tablero, pais):
-		""" Devuelve True si el pais no es frontera ni 
-		de orden 2 pero limita con alguno de orden 2.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		es_orden2 = self.es_orden2(tablero, pais)
-		if es_frontera or es_orden2:
-			return False
-		return self._limita_con(tablero, pais, self.es_orden2)
-	
 	def es_seguro(self, tablero, pais):
 		""" Deuvelve True si el pais no puede 
 		ser atacado en el siguiente turno.
 		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		es_orden2 = self.es_orden2(tablero, pais)
-		es_orden3 = self.es_orden3(tablero, pais)
-		return not (es_frontera or es_orden2 or es_orden3)
-		
+		return orden_proteccion[pais] > 3
+	
+	def orden_proteccion(self, tablero):
+		""" Devuelve un diccionario con tus paises 
+		de clave y la cantidad de ejercitos que 
+		lo protegen (incluyendose) como valor.
+		"""
+		orden_proteccion = {}
+		paises = tablero.paises_color(self.color)
+		for pais in paises:
+			if self.es_frontera(tablero, pais):
+				orden_proteccion[pais] = 1
+			else:
+				orden_proteccion[pais] = 100 #Numero absurdo: El maximo orden es 9 o 10
+		while 100 in orden_proteccion.values():
+			for pais in orden_proteccion:
+				for limitrofe in tablero.paises_limitrofes(pais):
+					if limitrofe not in paises:
+						continue
+					orden_proteccion[limitrofe] = min(orden_proteccion[limitrofe], orden_proteccion[pais]+1)
+		return orden_proteccion
 		
 		
