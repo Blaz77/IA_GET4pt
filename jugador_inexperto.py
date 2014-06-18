@@ -1,14 +1,14 @@
+# Practicando implementaciones de jugador
+# Este jugador sigue algunas reglas del archivo de inteligencia
+# Debería ganarle a JugadorAprendiz
 
 from constantes import *
 from jugador import Jugador
+from probabilidad import Probabilidad
 
-class JugadorInteligente(Jugador):
+class JugadorInexperto(Jugador):
+	""" Primer prototipo de un jugador inteligente.
 	"""
-	Este jugador va a ganar el torneo!
-
-	(Escribir codigo de aca para abajo)
-	"""
-
 	def _limita_con(self, tablero, pais, condicion):
 		""" Recibe un pais, devuelve True si 
 		algun limite cumple con la condicion.
@@ -25,35 +25,30 @@ class JugadorInteligente(Jugador):
 	
 	def es_enemigo(self, tablero, pais):
 		return not self.es_mi_pais(tablero, pais)
-	
+		
 	def es_frontera(self, tablero, pais):
-		""" Recibe un pais aliado, devuelve 
-		True si limita con algun pais enemigo.
+		""" Devuelve True si el pais limita con algun pais enemigo.
 		"""
 		return self._limita_con(tablero, pais, self.es_enemigo)
 	
-	def es_amenaza(self, tablero, pais):
-		""" Recibe un pais enemigo, devuelve True 
-		si limita con alguno de los paises aliados.
-		"""
-		if es_mi_pais(self, tablero, pais):
-			raise ValueError()
-		return self.limita_con(tablero, pais, self.es_frontera)
-	
-	def es_frontera_unica(self, tablero, pais):
-		""" Devuelve True si el pais es frontera y 
-		no limita con ninguna otra.
+	def es_orden2(self, tablero, pais):
+		""" Devuelve True si el pais no es frontera pero 
+		es limitrofe con alguna de tus fronteras.
 		"""
 		es_frontera = self.es_frontera(tablero, pais)
-		if not es_frontera:
+		if es_frontera:
 			return False
-		return not self._limita_con(tablero, pais, self.es_frontera)
-		
-	def es_seguro(self, tablero, pais):
-		""" Deuvelve True si el pais no puede 
-		ser atacado en el siguiente turno.
+		return self._limita_con(tablero, pais, self.es_frontera)
+	
+	def es_orden3(self, tablero, pais):
+		""" Devuelve True si el pais no es frontera ni 
+		de orden 2 pero limita con alguno de orden 2.
 		"""
-		return orden_proteccion[pais] > 3
+		es_frontera = self.es_frontera(tablero, pais)
+		es_orden2 = self.es_orden2(tablero, pais)
+		if es_frontera or es_orden2:
+			return False
+		return self._limita_con(tablero, pais, self.es_orden2)
 	
 	def orden_proteccion(self, tablero):
 		""" Devuelve un diccionario con tus paises 
@@ -74,7 +69,54 @@ class JugadorInteligente(Jugador):
 						continue
 					orden_proteccion[limitrofe] = min(orden_proteccion[limitrofe], orden_proteccion[pais]+1)
 		return orden_proteccion
+	
+	def agregar_ejercitos(self, tablero, cantidad):
+		# Esto tiene el problema de que agrega ejercitos en bloque.
+		jugada = {}
+		for continente, cantidad_continente in sorted(cantidad.items(), reverse=True):
+			paises_posibles = tablero.paises(continente)
+			for i, pais in enumerate(paises_posibles):
+				if tablero.color_pais(pais) != self.color:
+					continue
+				# Si en todos da False, agrega en el ultimo
+				if i != len(paises_posibles) - 1 and not self.quiero_agregar(tablero, pais):
+					continue
+				jugada[pais] = jugada.get(pais, 0) + cantidad_continente
+				break
+		return jugada
 		
+	def quiero_agregar(self, tablero, pais):
+		""" Informa si el pais es una buena opcion para agregar ejercitos """
+		# Quiero agregar si algun pais vecino es enemigo
+		return self.es_frontera(tablero, pais)
+	
+	def atacar(self, tablero, paises_ganados_ronda):
+		mis_paises = tablero.paises_color(self.color)
+		for pais in mis_paises:
+			for limitrofe in tablero.paises_limitrofes(pais):
+				# no me quiero atacar a mi mismo
+				if tablero.color_pais(limitrofe) == self.color:
+					continue
+				# Estrenando las probabilidades
+				if self.quiero_atacar(tablero, pais, limitrofe, 0.51):
+					return pais, limitrofe
+		return None
+		
+	def quiero_atacar(self, tablero, origen, destino, proba_aceptada):
+		""" Informa si el pais de destino es una buena opcion para atacar. Recibe
+		la probabilidad de exito aceptable y devuelve True si la probabilidad real
+		la iguala o supera.
+		"""
+		probabilidades = Probabilidad()
+		return (probabilidades.ataque(tablero.ejercitos_pais(origen), 
+				tablero.ejercitos_pais(destino)) >= proba_aceptada)
+
+	def mover(self, origen, destino, tablero, paises_ganados_ronda):
+		""" Se ejecuta al ocupar un pais y devuelve la cantidad de ejercitos
+		de ocupacion."""
+		# Muevo la mayor cantidad de ejercitos posible.
+		return max(1, min(3, tablero.ejercitos_pais(origen) - 1))
+	
 	def reagrupar(self, tablero, paises_ganados_ronda):
 		""" Mueve todos los ejercitos de un pais a paises 
 		de orden inferior. En caso de orden 2, se quedara 
