@@ -30,6 +30,25 @@ class JugadorAprendiz(Jugador):
 		"""
 		return self._limita_con(tablero, pais, self.es_enemigo)
 	
+	def es_orden2(self, tablero, pais):
+		""" Devuelve True si el pais no es frontera pero 
+		es limitrofe con alguna de tus fronteras.
+		"""
+		es_frontera = self.es_frontera(tablero, pais)
+		if es_frontera:
+			return False
+		return self._limita_con(tablero, pais, self.es_frontera)
+	
+	def es_orden3(self, tablero, pais):
+		""" Devuelve True si el pais no es frontera ni 
+		de orden 2 pero limita con alguno de orden 2.
+		"""
+		es_frontera = self.es_frontera(tablero, pais)
+		es_orden2 = self.es_orden2(tablero, pais)
+		if es_frontera or es_orden2:
+			return False
+		return self._limita_con(tablero, pais, self.es_orden2)
+	
 	def agregar_ejercitos(self, tablero, cantidad):
 		# Esto tiene el problema de que agrega ejercitos en bloque.
 		jugada = {}
@@ -76,3 +95,15 @@ class JugadorAprendiz(Jugador):
 		de ocupacion."""
 		# Muevo la mayor cantidad de ejercitos posible.
 		return max(1, min(3, tablero.ejercitos_pais(origen) - 1))
+	
+	def reagrupar(self, tablero, paises_ganados_ronda):
+		# Mueve los ejercitos de paises de orden 3 a paises de orden 2
+		reagrupamientos = []
+		mis_paises = tablero.paises_color(self.color)
+		for pais in mis_paises:
+			if (self.es_orden3(tablero, pais)):
+				for limitrofe in tablero.paises_limitrofes(pais):
+					if (limitrofe in mis_paises and self.es_orden2(tablero, limitrofe)):
+						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-1) )
+						break
+		return reagrupamientos
