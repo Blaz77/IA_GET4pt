@@ -79,6 +79,8 @@ class JugadorInteligente(Jugador):
 		""" Mueve todos los ejercitos de un pais a paises 
 		de orden inferior. En caso de orden 2, se quedara 
 		con 3 si puede.
+		NO FUNCIONA! No se porque hace levantar error en dados.
+		Tal vez estoy pidiendo movimientos ilegales sin darme cuenta...
 		"""
 		# Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
 		# Lo pongo como variable asi podemos modificarlo segun decidamos si dejarlo con estos u otros.
