@@ -101,19 +101,18 @@ class JugadorAprendiz(Jugador):
 		# Si el pais es de orden 2 y tiene mas de 10 ejercitos, mueve el
 		# excedente a paises frontera
 		reagrupamientos = []
-		cambios = {}
 		mis_paises = tablero.paises_color(self.color)
 		for pais in mis_paises:
 			if (self.es_orden3(tablero, pais)):
 				for limitrofe in tablero.paises_limitrofes(pais):
 					if (limitrofe in mis_paises and self.es_orden2(tablero, limitrofe)):
 						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-1) )
-						tablero.actualizar_interfaz(self.cambiar(reagrupamientos, cambios))
+						tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 						break
 			elif (self.es_orden2(tablero, pais) and tablero.ejercitos_pais(pais) > 10):
 				for limitrofe in tablero.paises_limitrofes(pais):
 					if (limitrofe in mis_paises and self.es_frontera(tablero, limitrofe)):
 						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-10) )
-						tablero.actualizar_interfaz(self.cambiar(reagrupamientos, cambios))
+						tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 						break
 		return reagrupamientos

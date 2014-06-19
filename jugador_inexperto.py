@@ -1,13 +1,13 @@
 # Practicando implementaciones de jugador
 # Este jugador sigue algunas reglas del archivo de inteligencia
-# Debería ganarle a JugadorAprendiz
+# Deberia ganarle a JugadorAprendiz
 
 from constantes import *
 from jugador import Jugador
-from probabilidad import Probabilidad
+from probabilidad import Probabilidad, proba
 
 class JugadorInexperto(Jugador):
-	""" Primer prototipo de un jugador inteligente.
+	""" Segundo prototipo de un jugador inteligente.
 	"""
 	def _limita_con(self, tablero, pais, condicion):
 		""" Recibe un pais, devuelve True si 
@@ -30,25 +30,6 @@ class JugadorInexperto(Jugador):
 		""" Devuelve True si el pais limita con algun pais enemigo.
 		"""
 		return self._limita_con(tablero, pais, self.es_enemigo)
-	
-	def es_orden2(self, tablero, pais):
-		""" Devuelve True si el pais no es frontera pero 
-		es limitrofe con alguna de tus fronteras.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		if es_frontera:
-			return False
-		return self._limita_con(tablero, pais, self.es_frontera)
-	
-	def es_orden3(self, tablero, pais):
-		""" Devuelve True si el pais no es frontera ni 
-		de orden 2 pero limita con alguno de orden 2.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		es_orden2 = self.es_orden2(tablero, pais)
-		if es_frontera or es_orden2:
-			return False
-		return self._limita_con(tablero, pais, self.es_orden2)
 	
 	def orden_proteccion(self, tablero):
 		""" Devuelve un diccionario con tus paises 
@@ -107,8 +88,7 @@ class JugadorInexperto(Jugador):
 		la probabilidad de exito aceptable y devuelve True si la probabilidad real
 		la iguala o supera.
 		"""
-		probabilidades = Probabilidad()
-		return (probabilidades.ataque(tablero.ejercitos_pais(origen), 
+		return (proba.ataque(tablero.ejercitos_pais(origen), 
 				tablero.ejercitos_pais(destino)) >= proba_aceptada)
 
 	def mover(self, origen, destino, tablero, paises_ganados_ronda):
@@ -126,8 +106,15 @@ class JugadorInexperto(Jugador):
 		"""
 		# Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
 		EXTRA_ORDEN2 = 2
+		
 		reagrupamientos = []
-		cambios = {}
+		# Lleva la cuenta de los ejercitos disponibles para reagrupar de los
+		# paises involucrados en esta ronda (Para evitar el traslado de ejercitos
+		# en cadena)
+		ejercitos_reagrupables = {}
+		for pais in tablero.paises_color(self.color):
+			ejercitos_reagrupables[pais] = tablero.ejercitos_pais(pais) - 1
+		
 		orden_proteccion = self.orden_proteccion(tablero)
 		orden_a_mover = max(orden_proteccion.values())
 		while orden_a_mover >= 2:
@@ -139,30 +126,28 @@ class JugadorInexperto(Jugador):
 					limitrofe in orden_proteccion and orden_proteccion[limitrofe] < orden_pais)]
 				
 				# Les reparto a cada uno una cantidad igual de todos mis ejercitos.
-				ejercitos_a_enviar = tablero.ejercitos_pais(pais) - 1
+				ejercitos_a_enviar = ejercitos_reagrupables[pais]
 				# En caso de que el pais sea de orden 2, repartira pero quedandose con EXTRA_ORDEN2 al final si es posible.
 				if orden_pais == 2:
-					ejercitos_recibidos = sum[x[2] for x in reagrupamientos if x[1] == pais]
-					ejercitos_a_enviar -= min(EXTRA_ORDEN2 - ejercitos_recibidos, EXTRA_ORDEN2)
+					ejercitos_a_enviar = max(ejercitos_a_enviar - EXTRA_ORDEN2, 0)
 				
-				# Para que lo hacemos laburar al pedo, no?
-				# Para eso esta la PC, trabaja esclavo!
 				if not ejercitos_a_enviar:
 					continue
 				
 				
 				for limitrofe in limitrofes_a_recibir:
+					ejercitos_reagrupables[pais] -= ejercitos_a_enviar/len(limitrofes_a_recibir)
 					reagrupamientos.append( (pais, limitrofe, ejercitos_a_enviar/len(limitrofes_a_recibir)) )
-					tablero.actualizar_interfaz(self._cambiar(reagrupamientos, cambios))
+					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 				
-				# Reparto los que sobraron.	
-				# Esto deberia dar un AssertionError, veremos.
+				# Reparto los que sobraron.
 				ejercitos_restantes = ejercitos_a_enviar % len(limitrofes_a_recibir)
 				if not ejercitos_restantes:
 					continue
-				for x in range(ejercitos_restantes):
+				for x in xrange(ejercitos_restantes):
+					ejercitos_reagrupables[pais] -= 1
 					reagrupamientos.append( (pais, limitrofes_a_recibir[x], 1) )
-					tablero.actualizar_interfaz(self._cambiar(reagrupamientos, cambios))
+					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 					
 			orden_a_mover -= 1
 			
