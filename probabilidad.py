@@ -54,10 +54,10 @@ class Probabilidad(object):
 
 		# Aqui, luego de realizar los calculos, agrega a la base de datos los resultados nuevos.
 		if minatk == 1 and maxdef == 0:
-			self.actualizar_base(atacante, atacado, self.ultima_probabilidad)
+			self._actualizar_base1(atacante, atacado, self.ultima_probabilidad)
 			agregar_proba("./bases/base.csv", atacante, atacado, self.ultima_probabilidad)
 		else:
-			self.actualizar_base2(atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
+			self._actualizar_base2(atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
 			agregar_proba_condicional("./bases/base_condicional.csv", atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
 		
 		# Devuelvo el elemento aqui mismo, quedando igual guardado en el atributo hasta un nuevo calculo.
