@@ -100,7 +100,7 @@ class JugadorInteligente(Jugador):
 				ejercitos_a_enviar = tablero.ejercitos_pais(pais) - 1
 				# En caso de que el pais sea de orden 2, repartira pero quedandose con EXTRA_ORDEN2 al final si es posible.
 				if orden_pais == 2:
-					ejercitos_recibidos = sum[x[2] for x in reagrupamientos if x[1] == pais]
+					ejercitos_recibidos = sum([x[2] for x in reagrupamientos if x[1] == pais])
 					ejercitos_a_enviar -= min(EXTRA_ORDEN2 - ejercitos_recibidos, EXTRA_ORDEN2)
 				
 				# Para que lo hacemos laburar al pedo, no?
