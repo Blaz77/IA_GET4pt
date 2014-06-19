@@ -32,3 +32,33 @@ Class TachoDeBasura(Jugador):
 	def riesgo_pais(self, tablero, pais):
 		'''Devuelve las chances de sobrevivir a un ataque compuesto. (mas o menos)'''
 		pass
+
+	def orden_minimo(self, tablero, continente, orden_proteccion):
+		"""Devuelve el minimo orden en un continente y los paises con el mismo."""
+		paises_continente_mios = [pais for pais in orden_proteccion if pais in tablero.paises(continente)]
+		orden_minimo = min([orden_proteccion[pais] for pais in paises_continente_mios])
+		paises = [pais for pais in paises_continente_mios if orden_proteccion[pais] == orden_minimo]
+		return paises
+		
+	def agregar_ejercitos(self, tablero, cantidad):
+                """ Errores: Es lento como la puta madre y
+                agrega repartido en las fronteras.
+                La re caga al principio de la partida y no
+                prioriza fronteras en peligro.
+                """
+		jugada = {}
+		orden_proteccion = self.orden_proteccion(tablero)
+		for continente in cantidad:
+			paises_posibles = self.orden_minimo(tablero, continente, orden_proteccion)
+			ejercitos = cantidad[continente]
+			while True:
+				if not ejercitos:
+					break
+				for pais in paises_posibles:
+					if ejercitos:
+						jugada[pais] = jugada.get(pais, 0) + 1
+						
+						ejercitos -= 1
+					else:
+						break
+		return jugada
