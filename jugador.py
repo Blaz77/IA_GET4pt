@@ -134,7 +134,7 @@ class Jugador(object):
 		menos."""
 		return []
 
-	def _cambiar(self, reagrupamientos, cambios):
+	def cambiar(self, reagrupamientos, cambios):
 		"""Plagiado vilmente del TP3 y usado por el metodo 
 		reagrupar, modifica el diccionario de cambios a 
 		partir de la lista de reagrupamientos
