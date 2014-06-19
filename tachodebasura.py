@@ -30,4 +30,5 @@ Class TachoDeBasura(Jugador):
 		return (proba.ataque(atacante, atacado) >= 0.7)
 
 	def riesgo_pais(self, tablero, pais):
-		
+		'''Devuelve las chances de sobrevivir a un ataque compuesto. (mas o menos)'''
+		pass
