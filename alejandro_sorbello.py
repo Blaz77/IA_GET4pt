@@ -8,17 +8,22 @@ class AlejandroSorbello(JugadorInteligente):
 	fuerza de infinita destruccion y miseria.
 	"""
 
+	# Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
+	EXTRA_ORDEN2 = 2
+	
 	def reagrupar(self, tablero, paises_ganados_ronda):
 		""" Mueve todos los ejercitos de un pais a paises 
 		de orden inferior. En caso de orden 2, se quedara 
 		con 3 si puede.
-		NO FUNCIONA! No se porque hace levantar error en dados.
-		Tal vez estoy pidiendo movimientos ilegales sin darme cuenta...
 		"""
-		# Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
-		EXTRA_ORDEN2 = 2
 		reagrupamientos = []
-		cambios = {}
+		# Lleva la cuenta de los ejercitos disponibles para reagrupar de los
+		# paises involucrados en esta ronda (Para evitar el traslado de ejercitos
+		# en cadena)
+		ejercitos_reagrupables = {}
+		for pais in tablero.paises_color(self.color):
+			ejercitos_reagrupables[pais] = tablero.ejercitos_pais(pais) - 1
+		
 		orden_proteccion = self.orden_proteccion(tablero)
 		orden_a_mover = max(orden_proteccion.values())
 		while orden_a_mover >= 2:
@@ -30,30 +35,28 @@ class AlejandroSorbello(JugadorInteligente):
 					limitrofe in orden_proteccion and orden_proteccion[limitrofe] < orden_pais)]
 				
 				# Les reparto a cada uno una cantidad igual de todos mis ejercitos.
-				ejercitos_a_enviar = tablero.ejercitos_pais(pais) - 1
+				ejercitos_a_enviar = ejercitos_reagrupables[pais]
 				# En caso de que el pais sea de orden 2, repartira pero quedandose con EXTRA_ORDEN2 al final si es posible.
 				if orden_pais == 2:
-					ejercitos_recibidos = sum([x[2] for x in reagrupamientos if x[1] == pais])
-					ejercitos_a_enviar -= min(EXTRA_ORDEN2 - ejercitos_recibidos, EXTRA_ORDEN2)
+					ejercitos_a_enviar = max(ejercitos_a_enviar - EXTRA_ORDEN2, 0)
 				
-				# Para que lo hacemos laburar al pedo, no?
-				# Para eso esta la PC, trabaja esclavo!
 				if not ejercitos_a_enviar:
 					continue
 				
 				
 				for limitrofe in limitrofes_a_recibir:
+					ejercitos_reagrupables[pais] -= ejercitos_a_enviar/len(limitrofes_a_recibir)
 					reagrupamientos.append( (pais, limitrofe, ejercitos_a_enviar/len(limitrofes_a_recibir)) )
-					tablero.actualizar_interfaz(self._cambiar(reagrupamientos, cambios))
+					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 				
-				# Reparto los que sobraron.	
-				# Esto deberia dar un AssertionError, veremos.
+				# Reparto los que sobraron.
 				ejercitos_restantes = ejercitos_a_enviar % len(limitrofes_a_recibir)
 				if not ejercitos_restantes:
 					continue
-				for x in range(ejercitos_restantes):
+				for x in xrange(ejercitos_restantes):
+					ejercitos_reagrupables[pais] -= 1
 					reagrupamientos.append( (pais, limitrofes_a_recibir[x], 1) )
-					tablero.actualizar_interfaz(self._cambiar(reagrupamientos, cambios))
+					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 					
 			orden_a_mover -= 1
 			
