@@ -79,10 +79,10 @@ class JugadorRegular(Jugador):
 		probabilidad de exito aceptada para afrontar un ataque.
 		"""
 		# Constantes para facil configuracion y correccion
-		PA_NORMAL = 0.51
-		PA_TARJETA_GANADA = 0.7
+		PA_NORMAL = 0.49
+		PA_TARJETA_GANADA = 0.67
 		
-		if (paises_ganados_ronda >= 2 or (paises_ganados_ronda == 1 and \
+		if (len(paises_ganados_ronda) >= 2 or (len(paises_ganados_ronda) == 1 and \
 				self.cantidad_canjes < 3)):
 			self.proba_aceptada = PA_TARJETA_GANADA
 		else:
@@ -109,6 +109,8 @@ class JugadorRegular(Jugador):
 		return self.es_frontera(tablero, pais)
 	
 	def atacar(self, tablero, paises_ganados_ronda):
+		self.actualizar_personalidad(tablero, paises_ganados_ronda)
+		
 		mis_paises = tablero.paises_color(self.color)
 		for pais in mis_paises:
 			for limitrofe in tablero.paises_limitrofes(pais):

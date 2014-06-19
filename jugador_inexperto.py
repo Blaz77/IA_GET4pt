@@ -105,8 +105,6 @@ class JugadorInexperto(Jugador):
 		""" Mueve todos los ejercitos de un pais a paises 
 		de orden inferior. En caso de orden 2, se quedara 
 		con 3 si puede.
-		NO FUNCIONA! No se porque hace levantar error en dados.
-		Tal vez estoy pidiendo movimientos ilegales sin darme cuenta...
 		"""
 		reagrupamientos = []
 		# Lleva la cuenta de los ejercitos disponibles para reagrupar de los
