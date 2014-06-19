@@ -88,4 +88,5 @@ class Probabilidad(object):
 		return self.ultima_probabilidad
 
 # Este de aca esta para hacer pruebas en terminal mas rapido, despues lo borro.
+# Correccion. Demasiado conveniente cargar el objeto una sola vez como para borrar esta preciosa linea de aca abajo.
 proba = Probabilidad()
