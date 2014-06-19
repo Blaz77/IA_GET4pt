@@ -101,8 +101,6 @@ def actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabi
 
 def _crear_backup(base_backup = CHANCES_GANAR, nombre_archivo = "./bases/base_BACKUP.csv"):
         agregar_proba(nombre_archivo, "Atacante", "Atacado", "Probabilidad", "w")
-        for elemento in base_backup:
-                agregar_proba(nombre_archivo, elemento[0], elemento[1], base_backup[elemento], "a")
 
 def _crear_backup_condicional(nombre_archivo = "./bases/base_condicional_BACKUP.csv"):
         agregar_proba_condicional(nombre_archivo, "Atacante", "Atacado", "Minatk", "Maxdef", "Probabilidad", "w")
