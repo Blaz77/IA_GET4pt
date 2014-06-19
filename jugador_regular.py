@@ -125,8 +125,31 @@ class JugadorRegular(Jugador):
 		la probabilidad de exito aceptable y devuelve True si la probabilidad real
 		la iguala o supera.
 		"""
-		return (proba.ataque(tablero.ejercitos_pais(origen), 
-				tablero.ejercitos_pais(destino)) >= self.proba_aceptada)
+		# Ejercitos de paises
+		atacante = tablero.ejercitos_pais(origen)
+		atacado = tablero.ejercitos_pais(destino)
+		if atacante == 1: return False
+		
+		# En casos extremos no hace falta usar el modulo de probas
+		# Victoria muy probable, con el doble de ejercitos + 1
+		if (atacante >= 2*atacado + 1 and self.proba_aceptada <= 0.67): 
+			return True
+		# Para ataques individuales las probabilidades de ganar con menos ejercitos
+		# que el oponente es menor que 0.15
+		if (atacante >= atacado and proba.ataque(atacante, atacado) >= self.proba_aceptada)
+			return True
+			
+		# Para los casos restantes se necesita ayuda externa
+		paises_a_componer = [pais for pais in tablero.paises_limitrofes(destino) if self.es_mi_pais(tablero, pais) and pais != origen]
+		if not paises_a_componer:
+			return False
+		
+		# Importante: Hay que ver el minatk de cada pais, ya que tampoco hay que desprotegerlos
+		# Calculamos una probabilidad que no es exacta pero seguro es menor a la exacta.
+		atacante += sum([max(tablero.ejercitos_pais(pais)-3,0) for pais in paises_a_componer])
+		if (atacante >= 2*atacado + 1 and self.proba_aceptada <= 0.67): return True
+		if (atacante < atacado): return False
+		return (proba.ataque(atacante, atacado) >= proba_aceptada)
 
 	def mover(self, origen, destino, tablero, paises_ganados_ronda):
 		""" Se ejecuta al ocupar un pais y devuelve la cantidad de ejercitos

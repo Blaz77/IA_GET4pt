@@ -17,6 +17,7 @@ Class TachoDeBasura(Jugador):
 		# En casos mas turbios, usamos el modulo de probas
 		if atacante > 1.8*atacado + 1 and (proba.ataque(atacante, atacado) >= 0.7): return True 
 		#Use 0.7 xq ya se q mas o menos con doble + 1 siempre superas esa proba.
+		# No siempre (Ver 27 vs 13, 31 vs 15) pero muy cerca
 		
 		# Si el pais solo no puede, buscamos ayuda externa...
 		paises_a_componer = [pais for pais in tablero.paises_limitrofes(destino) if self.es_mi_pais(tablero, pais) and pais != origen]

@@ -81,6 +81,16 @@ class Probabilidad(object):
 			j = i + 1
 			self.ultima_probabilidad += (1 - self.ultima_probabilidad) * self.ataque(atk2, atacado, minatk2, maxdef)
 		return self.ultima_probabilidad
+		
+	def ataque_doble2(self, atacante1, atacante2, atacado, minatk1 = 1, minatk2 = 1, maxdef = 0):
+		"""Calcula la probabilidad de conquistar un pais si lo atacamos de a 2."""
+		#NO ESTA TESTEADO! Poco confiable, no usar.
+		# Lo duplico por las dudas de que no ande
+		self.ultima_probabilidad = self.ataque(atacante1, atacado, minatk1, atacado/2 - maxdef)
+		self.ultima_probabilidad += self.ataque(atacante2, atacado, minatk2, atacado/2 - maxdef)
+		self.ultima_probabilidad /= 2
+		
+		return self.ultima_probabilidad
 
 	def ver_ultimo_calculo(self):
 		""" Devuelve el resultado del ultimo calculo de probabilidad.
