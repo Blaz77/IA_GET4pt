@@ -49,17 +49,21 @@ Class TachoDeBasura(Jugador):
                 """
 		jugada = {}
 		orden_proteccion = self.orden_proteccion(tablero)
-		for continente in cantidad:
+		for continente in sorted(cantidad.keys(), reverse=True)::
 			paises_posibles = self.orden_minimo(tablero, continente, orden_proteccion)
 			ejercitos = cantidad[continente]
-			while True:
-				if not ejercitos:
-					break
+			while (ejercitos > 0):
 				for pais in paises_posibles:
-					if ejercitos:
+					# Cuidado: Riesgo de bucle infinito
+					if (orden_proteccion[pais] > 1 or orden_proteccion[pais] == 1 and \
+							self.quiero_agregar(tablero, pais) == True)
 						jugada[pais] = jugada.get(pais, 0) + 1
 						
 						ejercitos -= 1
-					else:
-						break
+					if (ejercitos == 0): break
 		return jugada
+	
+	def quiero_agregar(self, tablero, pais_frontera):
+		""" Informa si el pais frontera es una buena opcion para agregar ejercitos """
+		# Quiero agregar si algun pais vecino es enemigo
+		return True
