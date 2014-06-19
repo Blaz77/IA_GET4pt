@@ -99,7 +99,7 @@ def actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabi
                 base[(atacante, atacado)] = {}
         base[(atacante, atacado)].update({(minatk, maxdef): probabilidad})
 
-def _crear_backup(base_backup = CHANCES_GANAR, nombre_archivo = "./bases/base_BACKUP.csv"):
+def _crear_backup(nombre_archivo = "./bases/base_BACKUP.csv"):
         agregar_proba(nombre_archivo, "Atacante", "Atacado", "Probabilidad", "w")
 
 def _crear_backup_condicional(nombre_archivo = "./bases/base_condicional_BACKUP.csv"):
