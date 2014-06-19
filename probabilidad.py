@@ -50,7 +50,7 @@ class Probabilidad(object):
 		chance = CHANCES[(atacantereal, atacadoreal)]
 		ck = sorted(chance.keys())
 		self.ultima_probabilidad = sum([chance[ck[x]] * self.ataque(
-                        atacante + ck[x][0], atacado + ck[x][1], minatk, maxdef) for x in range(4)])
+                        atacante + ck[x][0], atacado + ck[x][1], minatk, maxdef) for x in xrange(4)])
 
 		# Aqui, luego de realizar los calculos, agrega a la base de datos los resultados nuevos.
 		if minatk == 1 and maxdef == 0:

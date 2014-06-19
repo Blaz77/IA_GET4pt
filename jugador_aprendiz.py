@@ -8,6 +8,10 @@ from probabilidad import Probabilidad
 class JugadorAprendiz(Jugador):
 	""" Primer prototipo de un jugador inteligente.
 	"""
+	def __init__(self, color, nombre):
+		self.probabilidades = Probabilidad()
+		Jugador.__init__(self, color, nombre)
+	
 	def _limita_con(self, tablero, pais, condicion):
 		""" Recibe un pais, devuelve True si 
 		algun limite cumple con la condicion.
@@ -86,8 +90,7 @@ class JugadorAprendiz(Jugador):
 		la probabilidad de exito aceptable y devuelve True si la probabilidad real
 		la iguala o supera.
 		"""
-		probabilidades = Probabilidad()
-		return (probabilidades.ataque(tablero.ejercitos_pais(origen), 
+		return (self.probabilidades.ataque(tablero.ejercitos_pais(origen), 
 				tablero.ejercitos_pais(destino)) >= proba_aceptada)
 
 	def mover(self, origen, destino, tablero, paises_ganados_ronda):
