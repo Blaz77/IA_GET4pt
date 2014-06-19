@@ -1,3 +1,6 @@
+from interfaz import Interfaz
+
+
 if 64 - 64: i11iIiiIii
 from constantes import *
 if 65 - 65: O0 / iIii1I11I1II1 % OoooooooOO - i1IIi
@@ -58,6 +61,8 @@ class Tablero ( object ) :
     i11 [ ooO0oo0oO0 ] = ( self . _paises [ ooO0oo0oO0 ] [ 0 ] , self . _paises [ ooO0oo0oO0 ] [ 1 ] + agregados [ ooO0oo0oO0 ] )
    else :
     i11 [ ooO0oo0oO0 ] = self . _paises [ ooO0oo0oO0 ]
+  # chin chun i11 yen yuan
+  Interfaz.actualizar2(i11)
   return i11
   if 11 - 11: I1IiiI % o0oOOo0O0Ooo - Oo0Ooo
 
