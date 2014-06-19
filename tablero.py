@@ -1,4 +1,4 @@
-from interfaz import Interfaz
+from interfaz_tk import Interfaz
 
 
 if 64 - 64: i11iIiiIii

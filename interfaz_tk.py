@@ -42,7 +42,7 @@ class Interfaz(object):
 	def actualizar(tablero):
 		"""Recibe un diccionario de pares (color, ejercitos) por pais
 		y los muestra en el tablero."""
-		time.sleep(0.7)
+		time.sleep(0.6)
 		return Interfaz._ejecutar(_Interfaz.instancia.ubicar_ejercitos, tablero.actualizar_interfaz())
 
 	@staticmethod
