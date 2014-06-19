@@ -6,6 +6,9 @@ from constantes import *
 from jugador import Jugador
 from probabilidad import Probabilidad, proba
 
+# Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
+EXTRA_ORDEN2 = 2
+
 class JugadorInexperto(Jugador):
 	""" Segundo prototipo de un jugador inteligente.
 	"""
@@ -94,8 +97,9 @@ class JugadorInexperto(Jugador):
 	def mover(self, origen, destino, tablero, paises_ganados_ronda):
 		""" Se ejecuta al ocupar un pais y devuelve la cantidad de ejercitos
 		de ocupacion."""
-		# Muevo la mayor cantidad de ejercitos posible.
-		return max(1, min(3, tablero.ejercitos_pais(origen) - 1))
+		# Muevo la mayor cantidad de ejercitos posible, evitando que el origen 
+		# quede con menos ejercitos que 1+EXTRA_ORDEN2.
+		return max(1, min(3, tablero.ejercitos_pais(origen) - EXTRA_ORDEN2 - 1))
 	
 	def reagrupar(self, tablero, paises_ganados_ronda):
 		""" Mueve todos los ejercitos de un pais a paises 
@@ -104,9 +108,6 @@ class JugadorInexperto(Jugador):
 		NO FUNCIONA! No se porque hace levantar error en dados.
 		Tal vez estoy pidiendo movimientos ilegales sin darme cuenta...
 		"""
-		# Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
-		EXTRA_ORDEN2 = 2
-		
 		reagrupamientos = []
 		# Lleva la cuenta de los ejercitos disponibles para reagrupar de los
 		# paises involucrados en esta ronda (Para evitar el traslado de ejercitos
