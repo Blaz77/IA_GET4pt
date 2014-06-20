@@ -34,12 +34,12 @@ Class TachoDeBasura(Jugador):
 		'''Devuelve las chances de sobrevivir a un ataque compuesto. (mas o menos)'''
 		pass
 
-	def orden_minimo(self, tablero, continente, orden_proteccion):
-		"""Devuelve el minimo orden en un continente y los paises con el mismo."""
-		paises_continente_mios = [pais for pais in orden_proteccion if pais in tablero.paises(continente)]
-		orden_minimo = min([orden_proteccion[pais] for pais in paises_continente_mios])
-		paises = [pais for pais in paises_continente_mios if orden_proteccion[pais] == orden_minimo]
-		return paises
+	def orden_minimo(self, tablero, paises, orden_proteccion):
+		""" Dada una lista de paises y un diccionario de orden de proteccion por pais, devuelve
+		una lista de países cuyo orden es minimo."""
+		orden_minimo = min([orden_proteccion[pais] for pais in paises])
+		paises_orden_minimo = [pais for pais in paises if orden_proteccion[pais] == orden_minimo]
+		return paises_orden_minimo
 		
 	def cantidad_de_paises_restantes_para_conquistar_continente_completo(self, tablero, continente)
 		""" Calcula la cantidad de paises restantes para conquistar el
@@ -58,9 +58,8 @@ Class TachoDeBasura(Jugador):
                 prioriza fronteras en peligro.
                 """
 		jugada = {}
-		orden_proteccion = self.orden_proteccion(tablero)
 		for continente in sorted(cantidad.keys(), reverse=True)::
-			paises_posibles = self.orden_minimo(tablero, continente, orden_proteccion)
+			paises_posibles = tablero.paises(continente)
 			ejercitos = cantidad[continente]
 			while (ejercitos > 0):
 				for pais in paises_posibles:
@@ -72,6 +71,20 @@ Class TachoDeBasura(Jugador):
 						ejercitos -= 1
 					if (ejercitos == 0): break
 		return jugada
+		
+	def establecer_prioridades_agregar(self, tablero, paises, ejercitos, continente):
+		""" Recibe una lista de paises, una cantidad de ejercitos y un continente
+		de limitación (Para disposición libre usar "") y devuelve un diccionario
+		con los paises como clave y los ejercitos a agregar como valor. Los paises
+		de la lista deben pertenecer al continente.
+		"""
+		# Solo me interesan los paises propios más expuestos del continente
+		orden_proteccion = self.orden_proteccion(tablero)
+		paises_candidatos = self.orden_minimo(tablero, paises, orden_proteccion)
+		
+		prioridades {}
+		if (continente != ""):
+			# Al definir un continente, se que esta conquistado por completo.
 	
 	def quiero_agregar(self, tablero, pais_frontera):
 		""" Informa si el pais frontera es una buena opcion para agregar ejercitos """
