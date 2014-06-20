@@ -26,7 +26,7 @@ Al comenzar, los paises repartidos son aleatorios y hay que agregar ejercitos. E
 -- Africa
 -- Asia
 
-Las prioridades se basan en la cantidad de ejercitos que dan de bonus y la dificultar para defenderlos.
+Las prioridades se basan en la cantidad de ejercitos que dan de bonus y la dificultad para defenderlos.
 
 ***
 
@@ -34,7 +34,7 @@ Las prioridades se basan en la cantidad de ejercitos que dan de bonus y la dific
 
 La agresividad del jugador depende varios factores:
 -- Agresividad del oponente
--- Si ya puede tomar tarjeta
+-- Si ya puede tomar tarjeta (HECHO)
 
 El jugador en la ronda de ataque recorre todos sus países y busca la combinación de paises más favorable.
 Luego hay que evaluar las probabilidades de victoria de ese combate.
@@ -46,6 +46,6 @@ Y se repite el proceso hasta que no haya buenas chances para ningún país.
 *Reagrupación*
 
 - Los países más expuestos deben tener mayor cantidad de ejércitos.
-- - Un pais de orden 2 solo puede ser atacado con 3 ejercitos (2 dados). Con 1 ejercito, sus chances de perder son de 75.4%, con 2, 36.2%, con 3, 12% y con 4, 5%. Deberemos tomar un criterio sobre cuantos dejarle.
-- Los países de orden 4 o superior deben quedar con 1 ejercitos, y reagrupar tratando de enviar sus ejercitos a alguien de menor orden (si puede detectar quien los necesita mas, mejor)
+-- Un pais de orden 2 solo puede ser atacado con 3 ejercitos (2 dados). Con 1 ejercito, sus chances de perder son de 75.4%, con 2, 36.2%, con 3, 12% y con 4, 5%. Deberemos tomar un criterio sobre cuantos dejarle.
+- Los países de orden 3 o superior deben quedar con 1 ejercitos, y reagrupar tratando de enviar sus ejercitos a alguien de menor orden (HECHO) (si puede detectar quien los necesita mas, mejor)
 -- Para el resto...

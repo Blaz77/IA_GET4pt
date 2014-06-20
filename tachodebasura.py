@@ -41,6 +41,16 @@ Class TachoDeBasura(Jugador):
 		paises = [pais for pais in paises_continente_mios if orden_proteccion[pais] == orden_minimo]
 		return paises
 		
+	def cantidad_de_paises_restantes_para_conquistar_continente_completo(self, tablero, continente)
+		""" Calcula la cantidad de paises restantes para conquistar el
+		continente completo. Si es totalmente propio, devuelve 0.
+		"""
+		restantes = 0
+		for pais in tablero.paises(continente):
+			if not (tablero.color_pais(pais) == self.color):
+				restantes += 1
+		return restantes
+		
 	def agregar_ejercitos(self, tablero, cantidad):
                 """ Errores: Es lento como la puta madre y
                 agrega repartido en las fronteras.

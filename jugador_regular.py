@@ -20,6 +20,7 @@ class JugadorRegular(Jugador):
 	def __init__(self, color, nombre):
 		# Ver actualizar_personalidad
 		self.proba_aceptada = 0
+		self.caracter = 0
 		self.cantidad_canjes = 0
 		Jugador.__init__(self, color, nombre)
 	
@@ -74,13 +75,24 @@ class JugadorRegular(Jugador):
 		"""
 		self.cantidad_canjes += 1		
 	
-	def actualizar_personalidad(self, tablero, paises_ganados_ronda):
-		""" Usa toda la informacion que puede para determinar la
+	def actualizar_personalidad(self, tablero, paises_ganados_ronda=None):
+		""" Usa toda la informacion que puede para determinar el
+		caracter de refuerzo ds paises y la
 		probabilidad de exito aceptada para afrontar un ataque.
 		"""
 		# Constantes para facil configuracion y correccion
+		PER_DEFENSOR = 0
+		PER_CONQUISTADOR = 1
 		PA_NORMAL = 0.49
 		PA_TARJETA_GANADA = 0.67
+		
+		# Hay que poner alguna condicion (Podria ser si va ganando)
+		if (True):
+			self.caracter = PER_DEFENSOR
+		else:
+			self.caracter = PER_CONQUISTADOR
+		
+		if (paises_ganados_ronda is None): return
 		
 		if (len(paises_ganados_ronda) >= 2 or (len(paises_ganados_ronda) == 1 and \
 				self.cantidad_canjes < 3)):
@@ -89,6 +101,8 @@ class JugadorRegular(Jugador):
 			self.proba_aceptada = PA_NORMAL
 	
 	def agregar_ejercitos(self, tablero, cantidad):
+		self.actualizar_personalidad(tablero)
+		
 		# Esto tiene el problema de que agrega ejercitos en bloque.
 		jugada = {}
 		for continente, cantidad_continente in sorted(cantidad.items(), reverse=True):
