@@ -36,10 +36,10 @@ Class TachoDeBasura(Jugador):
 
 	def orden_minimo(self, tablero, paises, orden_proteccion):
 		""" Dada una lista de paises y un diccionario de orden de proteccion por pais, devuelve
-		una lista de países cuyo orden es minimo."""
+		el orden minimo y una lista de países de ese orden."""
 		orden_minimo = min([orden_proteccion[pais] for pais in paises])
 		paises_orden_minimo = [pais for pais in paises if orden_proteccion[pais] == orden_minimo]
-		return paises_orden_minimo
+		return orden_minimo, paises_orden_minimo
 		
 	def cantidad_de_paises_restantes_para_conquistar_continente_completo(self, tablero, continente)
 		""" Calcula la cantidad de paises restantes para conquistar el
@@ -58,35 +58,72 @@ Class TachoDeBasura(Jugador):
                 prioriza fronteras en peligro.
                 """
 		jugada = {}
-		for continente in sorted(cantidad.keys(), reverse=True)::
-			paises_posibles = tablero.paises(continente)
+		for continente in sorted(cantidad.keys(), reverse=True):
+			paises_posibles = [pais for pais in tablero.paises(continente) if tablero.color_pais(pais) == self.color]
 			ejercitos = cantidad[continente]
-			while (ejercitos > 0):
-				for pais in paises_posibles:
-					# Cuidado: Riesgo de bucle infinito
-					if (orden_proteccion[pais] > 1 or orden_proteccion[pais] == 1 and \
-							self.quiero_agregar(tablero, pais) == True)
-						jugada[pais] = jugada.get(pais, 0) + 1
-						
-						ejercitos -= 1
-					if (ejercitos == 0): break
+			jugada_parcial = self.establecer_prioridades_agregar(tablero, paises_posibles, ejercitos, nontinente)
+			for pais in jugada_parcial:
+				jugada[pais] = jugada.get(pais, 0) + jugada_parcial[pais]
 		return jugada
 		
 	def establecer_prioridades_agregar(self, tablero, paises, ejercitos, continente):
 		""" Recibe una lista de paises, una cantidad de ejercitos y un continente
 		de limitación (Para disposición libre usar "") y devuelve un diccionario
 		con los paises como clave y los ejercitos a agregar como valor. Los paises
-		de la lista deben pertenecer al continente.
+		de la lista deben pertenecer al continente y al jugador.
 		"""
 		# Solo me interesan los paises propios más expuestos del continente
 		orden_proteccion = self.orden_proteccion(tablero)
-		paises_candidatos = self.orden_minimo(tablero, paises, orden_proteccion)
+		orden_minimo, paises_candidatos = self.orden_minimo(tablero, paises, orden_proteccion)
 		
 		prioridades {}
-		if (continente != ""):
-			# Al definir un continente, se que esta conquistado por completo.
-	
-	def quiero_agregar(self, tablero, pais_frontera):
-		""" Informa si el pais frontera es una buena opcion para agregar ejercitos """
-		# Quiero agregar si algun pais vecino es enemigo
-		return True
+		if (orden_minimo >= 2):
+			# Esta situacion solo es posible si el continente esta totalmente conquistado
+			# y no posee ningun pais frontera
+			for pais in paises_candidatos:
+				prioridades[pais] = ejercitos / len(paises_candidatos)
+			for sobrante in xrange(ejercitos % len(paises_candidatos):
+				prioridades[paises_candidatos[sobrante]] += 1
+			return prioridades
+		elif (continente != ""):
+			# Reforzando paises frontera de continente conquistado
+			restantes = ejercitos
+			# Prioridad maxima: Defender las entradas de los continentes con al menos 3
+			# ejercitos
+			for pais in paises_candidatos:
+				prioridades[pais] = max(0, min(restantes, 3-tablero.ejercitos_pais(pais)))
+				restantes -= prioridades[pais]
+			# Si quedan ejercitos, reforzar en paises mas amenazados
+			if (restantes > 0):
+				amenazas = {}
+				for pais in paises_candidatos:
+					# Diferencia entre los ejercitos enemigos amenazando al pais y los que posee
+					amenazas[pais] = sum([tablero.ejercitos_pais(limitrofe) for limitrofe in tablero.paises_limitrofes(pais) \
+							if tablero.color_pais(limitrofe) != self.color]) - (tablero.ejercitos_pais(pais) + prioridades.get(pais, 0))
+				# Primero en paises con inferioridad numerica
+				paises_de_interes = [pais for pais in amenazas if amenazas[pais] > 0]
+				for pais in paises_de_interes:
+					ejercitos_agregar = min(restantes, amenazas[pais])
+					prioridades[pais] = prioridades.get(pais, 0) + ejercitos_agregar
+					restantes -= ejercitos_agregar
+					if (restantes == 0): return prioridades
+				
+				# Luego en paises con igualdad numerica
+				paises_de_interes = [pais for pais in amenazas if amenazas[pais] == 0]
+				for pais in paises_de_interes:
+					prioridades[pais] = prioridades.get(pais, 0) + 1
+					restantes -= 1
+					if (restantes == 0): return prioridades
+		
+				# Por ultimo en paises con superioridad numerica
+				paises_de_interes = [pais for pais in amenazas if amenazas[pais] < 0]
+				while (restantes > 0):
+					for pais in paises_de_interes:
+						prioridades[pais] = prioridades.get(pais, 0) + 1
+						restantes -= 1
+						if (restantes == 0): return prioridades
+		else:
+			# Eleccion libre. Solo tengo paises frontera
+			# (completar)
+			prioridades[paises_candidatos[0]] = ejercitos
+			return prioridades
