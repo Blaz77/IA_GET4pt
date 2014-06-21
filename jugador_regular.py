@@ -23,7 +23,7 @@ class JugadorRegular(JugadorInteligente):
 		self.proba_aceptada = 0
 		self.caracter = 0
 		self.cantidad_canjes = 0
-		Jugador.__init__(self, color, nombre)
+		JugadorInteligente.__init__(self, color, nombre)
 
 	def tarjetas_canjeadas(self, paises):
 		"""Esta funcion se llama cada vez que el jugador canjea
