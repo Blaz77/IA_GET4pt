@@ -8,7 +8,7 @@ class JugadorInteligente(Jugador):
 
 	(Escribir codigo de aca para abajo)
 	"""
-
+	#Dejo aca los metodos lindos rapidos y usados (casi) por todas las AI.
 	def _limita_con(self, tablero, pais, condicion):
 		""" Recibe un pais, devuelve True si 
 		algun limite cumple con la condicion.
