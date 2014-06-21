@@ -21,10 +21,15 @@ Al comenzar, los paises repartidos son aleatorios y hay que agregar ejercitos. E
 Órden de prioridades.
 -- America del Norte
 -- America del Sur
--- Oceania
+-- Oceania (Tenes q defender 3 fronteras de 4 paises! Conviene tener este con asia o sudamerica)
 -- Europa
--- Africa
--- Asia
+-- Africa (Es el mas facil de defender: 2 fronteras y estan conectadas para pasarse ejercitos)
+-- Asia (Es el mas dificil de defender.)
+
+¿Qué continente elegir y cómo capturarlo? Una forma sencilla: fijarse a priori si en un turno podes conquistarlo. Ejemplo, supongamos que tenemos solamente 3 paises en africa cuando arranca la partida. Pero esos 3 que nos faltan limitan con uno nuestro. En ese caso, es buena idea poner los 5 ejercitos en ese pais. Aunque ofrezcan resistencia, no pueden evitar q capturemos algo. Si todos los paises contrarios reciben ejercitos tambien, bueno, buscar algun lado donde poner y matar algo asi sacar tarjeta, y que se maten todos ahi.
+
+A proposito, diria que Africa es un buen continente para tener, mejor que america del sur desde luego.
+
 
 Las prioridades se basan en la cantidad de ejercitos que dan de bonus y la dificultad para defenderlos.
 
