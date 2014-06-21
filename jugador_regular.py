@@ -9,12 +9,13 @@
 
 from constantes import *
 from jugador import Jugador
+from jugador_inteligente import JugadorInteligente
 from probabilidad import proba
 
 # Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
 EXTRA_ORDEN2 = 2
 
-class JugadorRegular(Jugador):
+class JugadorRegular(JugadorInteligente):
 	""" Tercer prototipo de un jugador inteligente.
 	"""
 	def __init__(self, color, nombre):
@@ -23,49 +24,7 @@ class JugadorRegular(Jugador):
 		self.caracter = 0
 		self.cantidad_canjes = 0
 		Jugador.__init__(self, color, nombre)
-	
-	def _limita_con(self, tablero, pais, condicion):
-		""" Recibe un pais, devuelve True si 
-		algun limite cumple con la condicion.
-		"""
-		if not self.es_mi_pais(tablero, pais):
-			raise ValueError("No es tu pais!")
-		for limitrofe in tablero.paises_limitrofes(pais):
-			if condicion(tablero, limitrofe):
-				return True
-		return False
-	
-	def es_mi_pais(self, tablero, pais):
-		return self.color == tablero.color_pais(pais)
-	
-	def es_enemigo(self, tablero, pais):
-		return not self.es_mi_pais(tablero, pais)
-		
-	def es_frontera(self, tablero, pais):
-		""" Devuelve True si el pais limita con algun pais enemigo.
-		"""
-		return self._limita_con(tablero, pais, self.es_enemigo)
-	
-	def orden_proteccion(self, tablero):
-		""" Devuelve un diccionario con tus paises 
-		de clave y la cantidad de paises que 
-		lo protegen (incluyendose) como valor.
-		"""
-		orden_proteccion = {}
-		paises = tablero.paises_color(self.color)
-		for pais in paises:
-			if self.es_frontera(tablero, pais):
-				orden_proteccion[pais] = 1
-			else:
-				orden_proteccion[pais] = 100 #Numero absurdo: El maximo orden es 9 o 10
-		while 100 in orden_proteccion.values():
-			for pais in orden_proteccion:
-				for limitrofe in tablero.paises_limitrofes(pais):
-					if limitrofe not in paises:
-						continue
-					orden_proteccion[limitrofe] = min(orden_proteccion[limitrofe], orden_proteccion[pais]+1)
-		return orden_proteccion
-		
+
 	def tarjetas_canjeadas(self, paises):
 		"""Esta funcion se llama cada vez que el jugador canjea
 		3 tarjetas por ejercitos.
