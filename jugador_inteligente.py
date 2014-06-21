@@ -53,8 +53,21 @@ class JugadorInteligente(Jugador):
 		""" Deuvelve True si el pais no puede 
 		ser atacado en el siguiente turno.
 		"""
+		orden_proteccion = self.orden_proteccion(tablero)
 		return orden_proteccion[pais] > 3
-	
+
+	@staticmethod #Para definir funciones que no utilizan al objeto.
+	def cambios(reagrupamientos):
+		"""Plagiado vilmente del TP3 y usado por el metodo 
+		reagrupar, modifica el diccionario de cambios a 
+		partir de la lista de reagrupamientos
+		"""
+		cambios = {}
+		for migracion in reagrupamientos:
+			cambios[migracion[0]] = cambios.get(migracion[0], 0) - migracion[2]
+			cambios[migracion[1]] = cambios.get(migracion[1], 0) + migracion[2]
+		return cambios
+
 	def orden_proteccion(self, tablero):
 		""" Devuelve un diccionario con tus paises 
 		de clave y la cantidad de paises que 
