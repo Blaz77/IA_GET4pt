@@ -1,6 +1,8 @@
 
 from constantes import *
 from jugador import Jugador
+from jugador_inteligente import JugadorInteligente
+#Le falta un modulo de agregar, igual ni te preocupes x esta estupidez de modulo
 
 class AlejandroSorbello(JugadorInteligente):
 	"""
