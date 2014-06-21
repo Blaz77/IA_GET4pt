@@ -3,53 +3,13 @@
 
 from constantes import *
 from jugador import Jugador
+from jugador_inteligente import JugadorInteligente
 from probabilidad import Probabilidad, proba
 
-class JugadorAprendiz(Jugador):
+class JugadorAprendiz(JugadorInteligente):
 	""" Primer prototipo de un jugador inteligente.
 	"""
 
-	def _limita_con(self, tablero, pais, condicion):
-		""" Recibe un pais, devuelve True si 
-		algun limite cumple con la condicion.
-		"""
-		if not self.es_mi_pais(tablero, pais):
-			raise ValueError("No es tu pais!")
-		for limitrofe in tablero.paises_limitrofes(pais):
-			if condicion(tablero, limitrofe):
-				return True
-		return False
-	
-	def es_mi_pais(self, tablero, pais):
-		return self.color == tablero.color_pais(pais)
-	
-	def es_enemigo(self, tablero, pais):
-		return not self.es_mi_pais(tablero, pais)
-		
-	def es_frontera(self, tablero, pais):
-		""" Devuelve True si el pais limita con algun pais enemigo.
-		"""
-		return self._limita_con(tablero, pais, self.es_enemigo)
-	
-	def es_orden2(self, tablero, pais):
-		""" Devuelve True si el pais no es frontera pero 
-		es limitrofe con alguna de tus fronteras.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		if es_frontera:
-			return False
-		return self._limita_con(tablero, pais, self.es_frontera)
-	
-	def es_orden3(self, tablero, pais):
-		""" Devuelve True si el pais no es frontera ni 
-		de orden 2 pero limita con alguno de orden 2.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		es_orden2 = self.es_orden2(tablero, pais)
-		if es_frontera or es_orden2:
-			return False
-		return self._limita_con(tablero, pais, self.es_orden2)
-	
 	def agregar_ejercitos(self, tablero, cantidad):
 		# Esto tiene el problema de que agrega ejercitos en bloque.
 		jugada = {}
@@ -102,14 +62,15 @@ class JugadorAprendiz(Jugador):
 		# excedente a paises frontera
 		reagrupamientos = []
 		mis_paises = tablero.paises_color(self.color)
+		orden_proteccion = self.orden_proteccion(tablero)
 		for pais in mis_paises:
-			if (self.es_orden3(tablero, pais)):
+			if (orden_proteccion[pais] == 3):
 				for limitrofe in tablero.paises_limitrofes(pais):
-					if (limitrofe in mis_paises and self.es_orden2(tablero, limitrofe)):
+					if (limitrofe in mis_paises and orden_proteccion[pais] == 2):
 						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-1) )
 						tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 						break
-			elif (self.es_orden2(tablero, pais) and tablero.ejercitos_pais(pais) > 10):
+			elif (orden_proteccion[pais] == 2 and tablero.ejercitos_pais(pais) > 10):
 				for limitrofe in tablero.paises_limitrofes(pais):
 					if (limitrofe in mis_paises and self.es_frontera(tablero, limitrofe)):
 						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-10) )
