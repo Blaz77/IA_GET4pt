@@ -123,7 +123,7 @@ class Tablero ( object ) :
 
   for i1iIIIiI1I in self . continentes :
    if 70 - 70: Oo0Ooo % Oo0Ooo . IiII % OoO0O00 * o0oOOo0O0Ooo % oO0o
-   if pais in i1iIIIiI1I :
+    if pais in self.continentes[i1iIIIiI1I] :
     return i1iIIIiI1I
     if 23 - 23: i11iIiiIii + I1IiiI
 
