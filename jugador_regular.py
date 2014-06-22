@@ -32,7 +32,7 @@ class JugadorRegular(JugadorInteligente):
 		JugadorInteligente.__init__(self, color, nombre)
 	
 	def ronda_iniciada(self, tablero, ronda, orden_ronda):
-		"""Guarda los valores recibidos como parámetros, a ser usados por
+		"""Guarda los valores recibidos como parametros, a ser usados por
 		el jugador en otras ocasiones.
 		"""
 
@@ -43,7 +43,7 @@ class JugadorRegular(JugadorInteligente):
 		"""Esta funcion se llama cada vez que el jugador usa una tarjeta
 		para incorporar 2 ejercitos en un pais.
 		"""
-		# Este chequeo será inutil una vez q confirmemos que nunca ocurre.
+		# Este chequeo sera inutil una vez q confirmemos que nunca ocurre.
 		if pais not in tarjetas:
 			raise ValueError("No la teniamos")
 		self.tarjetas[pais] = True
@@ -51,7 +51,7 @@ class JugadorRegular(JugadorInteligente):
 	def tarjeta_recibida(self, pais):
 		"""Esta funcion se llama cada vez que el jugador recibe una tarjeta.
 		"""
-		# Este chequeo será inutil una vez q confirmemos que nunca ocurre.
+		# Este chequeo sera inutil una vez q confirmemos que nunca ocurre.
 		if pais in tarjetas:
 			raise ValueError("Ya la teniamos")
 		self.tarjetas[pais] = False
@@ -93,10 +93,10 @@ class JugadorRegular(JugadorInteligente):
 			self.proba_aceptada = PA_NORMAL
 	
 	def agregar_ejercitos(self, tablero, cantidad):
-		""" Algo de documentación asi se ve verde y bonito. """
+		""" Algo de documentacion asi se ve verde y bonito. """
 		self.actualizar_personalidad(tablero)
 		if self.ronda == 1:
-			return _agregar_ejercitos_inicial(self, tablero, cantidad)
+			return self._agregar_ejercitos_inicial(tablero, cantidad)
 		# Esto tiene el problema de que agrega ejercitos en bloque.
 		jugada = {}
 		for continente, cantidad_continente in sorted(cantidad.items(), reverse=True):
@@ -117,15 +117,15 @@ class JugadorRegular(JugadorInteligente):
 		# Esta lista de continentes esta ordenada segun la prioridad (cual conviene mas).
 		continentes = ['Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte', 'Asia'] 
 		conquistables = list(continentes)
-		if cantidad == 3:
+		if cantidad[continente] == 3:
 			precaucion = 2
-		else:			# Numero de ejércitos permitidos q pueden tener los rivales del continente.
+		else:			# Numero de ejercitos permitidos q pueden tener los rivales del continente.
 			precaucion = 1
 		
 		for continente in continentes:
 			# Chequea si un continente puede ser conquistado en 1 turno.
 			for pais in tablero.paises(continente):
-				if not ( self.es_mi_pais(pais) or (self.es_amenaza(pais) 
+				if not ( self.es_mi_pais(tablero, pais) or (self.es_amenaza(tablero, pais) 
 				and tablero.ejercitos_pais(pais) >= precaucion) ):
 					conquistables.pop(continente)
 		
@@ -135,22 +135,23 @@ class JugadorRegular(JugadorInteligente):
 			continente = ''
 		else:
 			continente = conquistables[0]
-=
-		return {_top_limitrofes(tablero, continente)[0]: cantidad}
+		jugada = {}
+		jugada[self._top_limitrofes(tablero, continente)[0]] = cantidad[continente]
+		return jugada
+		
 
-	@staticmethod
-	def _top_limitrofes(tablero, continente = ''):
+	def _top_limitrofes(self, tablero, continente = ''):
 		'''Devuelve una lista de todos mis paises del continente 
 		ordenados segun la cantidad de paises de ejercito 1 enemigos 
 		del continente a su alrededor. De no seleccionar continente, 
 		devolvera todos.'''
-		mis_paises: [pais for pais in tablero.paises(continente) if es_mi_pais(pais)]
+		mis_paises = [pais for pais in tablero.paises(continente) if self.es_mi_pais(tablero, pais)]
 		
-		# Ordena la lista mis_paises según la cantidad de paises 
+		# Ordena la lista mis_paises segun la cantidad de paises 
 		# limitrofes enemigos de 1 ejercito, de mayor a menor.
 		return sorted(mis_paises, key=lambda pais: len(
 			[limitrofe for limitrofe in tablero.paises_limitrofes(pais) if 
-			not es_mi_pais(pais) and tablero.ejercitos_pais(pais) == 1 and 
+			not self.es_mi_pais(tablero, pais) and tablero.ejercitos_pais(pais) == 1 and 
 			tablero.continente_pais(limitrofe) == continente]), reverse=True)
 
 	def quiero_agregar(self, tablero, pais):
@@ -188,7 +189,7 @@ class JugadorRegular(JugadorInteligente):
 			return True
 		# Para ataques individuales las probabilidades de ganar con menos ejercitos
 		# que el oponente es menor que 0.15
-		if (atacante >= atacado and proba.ataque(atacante, atacado) >= self.proba_aceptada)
+		if (atacante >= atacado and proba.ataque(atacante, atacado) >= self.proba_aceptada):
 			return True
 			
 		# Para los casos restantes se necesita ayuda externa
@@ -216,48 +217,45 @@ class JugadorRegular(JugadorInteligente):
 		con 3 si puede.
 		"""
 		reagrupamientos = []
+		
 		# Lleva la cuenta de los ejercitos disponibles para reagrupar de los
 		# paises involucrados en esta ronda (Para evitar el traslado de ejercitos
 		# en cadena)
 		ejercitos_reagrupables = {}
 		for pais in tablero.paises_color(self.color):
-			ejercitos_reagrupables[pais] = tablero.ejercitos_pais(pais) - 1
-		
+			if tablero.ejercitos_pais(pais) > 1:
+				ejercitos_reagrupables[pais] = tablero.ejercitos_pais(pais) - 1
+				
 		orden_proteccion = self.orden_proteccion(tablero)
-		orden_a_mover = max(orden_proteccion.values())
-		while orden_a_mover >= 2:
-			paises_a_mover = [pais for pais in orden_proteccion if orden_proteccion[pais] == orden_a_mover]
-			orden_pais = orden_a_mover
-			for pais in paises_a_mover:
-				# Defino quienes van a ser los que reciban algo de este pais.
-				limitrofes_a_recibir = [limitrofe for limitrofe in tablero.paises_limitrofes(pais) if (
-					limitrofe in orden_proteccion and orden_proteccion[limitrofe] < orden_pais)]
+		for pais in ejercitos_reagrupables:
+			if orden_proteccion[pais] == 1:
+				continue
+			# Defino quienes van a ser los que reciban algo de este pais.
+			limitrofes_a_recibir = [limitrofe for limitrofe in tablero.paises_limitrofes(pais) if (
+				self.es_mi_pais(tablero, limitrofe) and orden_proteccion[limitrofe] < orden_proteccion[pais])]
 				
-				# Les reparto a cada uno una cantidad igual de todos mis ejercitos.
-				ejercitos_a_enviar = ejercitos_reagrupables[pais]
-				# En caso de que el pais sea de orden 2, repartira pero quedandose con EXTRA_ORDEN2 al final si es posible.
-				if orden_pais == 2:
-					ejercitos_a_enviar = max(ejercitos_a_enviar - EXTRA_ORDEN2, 0)
-				
+			# Les reparto a cada uno una cantidad igual de todos mis ejercitos.
+			ejercitos_a_enviar = ejercitos_reagrupables[pais]
+			
+			# En caso de que el pais sea de orden 2, repartira pero quedandose con EXTRA_ORDEN2 al final si es posible.
+			if orden_proteccion[pais] == 2:
+				ejercitos_a_enviar = max(ejercitos_a_enviar - EXTRA_ORDEN2, 0)
 				if not ejercitos_a_enviar:
 					continue
-				
-				
-				for limitrofe in limitrofes_a_recibir:
-					ejercitos_reagrupables[pais] -= ejercitos_a_enviar/len(limitrofes_a_recibir)
-					reagrupamientos.append( (pais, limitrofe, ejercitos_a_enviar/len(limitrofes_a_recibir)) )
-					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
-				
-				# Reparto los que sobraron.
-				ejercitos_restantes = ejercitos_a_enviar % len(limitrofes_a_recibir)
-				if not ejercitos_restantes:
-					continue
-				for x in xrange(ejercitos_restantes):
-					ejercitos_reagrupables[pais] -= 1
-					reagrupamientos.append( (pais, limitrofes_a_recibir[x], 1) )
-					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
-					
-			orden_a_mover -= 1
+
+			for limitrofe in limitrofes_a_recibir:
+				ejercitos_reagrupables[pais] -= ejercitos_a_enviar/len(limitrofes_a_recibir)
+				reagrupamientos.append( (pais, limitrofe, ejercitos_a_enviar/len(limitrofes_a_recibir)) )
+				tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+
+			# Reparto los que sobraron.
+			ejercitos_restantes = ejercitos_a_enviar % len(limitrofes_a_recibir)
+			if not ejercitos_restantes:
+				continue
+			for x in xrange(ejercitos_restantes):
+				ejercitos_reagrupables[pais] -= 1
+				reagrupamientos.append( (pais, limitrofes_a_recibir[x], 1) )
+				tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 			
 		# ACA ME FALTA IMPLEMENTAR QUE UNA FRONTERA LE PASE EJERCITOS A OTRA SI HACE FALTA PARA MAXIMIZAR LA SEGURIDAD.
 		return reagrupamientos
