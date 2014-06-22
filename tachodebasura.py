@@ -72,6 +72,9 @@ Class TachoDeBasura(Jugador):
 		con los paises como clave y los ejercitos a agregar como valor. Los paises
 		de la lista deben pertenecer al continente y al jugador.
 		"""
+		# Lista de continentes ordenados por su deseabilidad en forma descendente
+		CONTINENTES_ORDENADOS = ["Africa", "Oceania", "America del Sur", "America del Norte", "Europa", "Asia"]
+		
 		# Solo me interesan los paises propios más expuestos del continente
 		orden_proteccion = self.orden_proteccion(tablero)
 		orden_minimo, paises_candidatos = self.orden_minimo(tablero, paises, orden_proteccion)
@@ -123,7 +126,25 @@ Class TachoDeBasura(Jugador):
 						restantes -= 1
 						if (restantes == 0): return prioridades
 		else:
+			restantes = ejercitos
 			# Eleccion libre. Solo tengo paises frontera
-			# (completar)
-			prioridades[paises_candidatos[0]] = ejercitos
+			# Agregado defensivo en continentes conquistados
+			for continente in self.continentes_conquistados:
+				paises_de_interes = [pais for pais in paises_candidatos if tablero.continente_pais(pais) == continente]
+				
+				# Prioridad maxima: Defender las entradas de los continentes con al menos 3
+				# ejercitos
+				for pais in paises_candidatos:
+					prioridades[pais] = max(0, min(restantes, 3-tablero.ejercitos_pais(pais)))
+					restantes -= prioridades[pais]
+			
+			if (restantes > 0):
+				if (self.caracter == PER_CONQUISTADOR):
+					# Pongo ejercitos en paises que limitan con otros conquistables
+					ejercitos_minimo = 1
+					while (restantes == 0):
+				elif (self.caracter == PER_DEFENSOR):
+					
+				elif (self.caracter == PER_NEUTRAL):
+					
 			return prioridades
