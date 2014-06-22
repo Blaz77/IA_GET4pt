@@ -13,8 +13,6 @@ class JugadorInteligente(Jugador):
 		""" Recibe un pais, devuelve True si 
 		algun limite cumple con la condicion.
 		"""
-		if not self.es_mi_pais(tablero, pais):
-			raise ValueError("No es tu pais!")
 		for limitrofe in tablero.paises_limitrofes(pais):
 			if condicion(tablero, limitrofe):
 				return True
@@ -36,9 +34,9 @@ class JugadorInteligente(Jugador):
 		""" Recibe un pais enemigo, devuelve True 
 		si limita con alguno de los paises aliados.
 		"""
-		if es_mi_pais(self, tablero, pais):
-			raise ValueError()
-		return self.limita_con(tablero, pais, self.es_frontera)
+		if self.es_mi_pais(tablero, pais):
+			raise ValueError("Es mi pais!")
+		return self._limita_con(tablero, pais, self.es_frontera)
 	
 	def es_frontera_unica(self, tablero, pais):
 		""" Devuelve True si el pais es frontera y 
