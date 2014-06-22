@@ -95,7 +95,8 @@ class JugadorRegular(JugadorInteligente):
 	def agregar_ejercitos(self, tablero, cantidad):
 		""" Algo de documentación asi se ve verde y bonito. """
 		self.actualizar_personalidad(tablero)
-		
+		if self.ronda == 1:
+			return _agregar_ejercitos_inicial(self, tablero, cantidad)
 		# Esto tiene el problema de que agrega ejercitos en bloque.
 		jugada = {}
 		for continente, cantidad_continente in sorted(cantidad.items(), reverse=True):
@@ -110,6 +111,48 @@ class JugadorRegular(JugadorInteligente):
 				break
 		return jugada
 		
+	def _agregar_ejercitos_inicial(self, tablero, cantidad):
+		"""Cantidad sera 5 o 3 siempre"""
+		
+		# Esta lista de continentes esta ordenada segun la prioridad (cual conviene mas).
+		continentes = ['Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte', 'Asia'] 
+		conquistables = list(continentes)
+		if cantidad == 3:
+			precaucion = 2
+		else:			# Numero de ejércitos permitidos q pueden tener los rivales del continente.
+			precaucion = 1
+		
+		for continente in continentes:
+			# Chequea si un continente puede ser conquistado en 1 turno.
+			for pais in tablero.paises(continente):
+				if not ( self.es_mi_pais(pais) or (self.es_amenaza(pais) 
+				and tablero.ejercitos_pais(pais) >= precaucion) ):
+					conquistables.pop(continente)
+		
+		# Devolvera el pais con mas limitrofes enemigos de ej. 1 que encuentre,
+		# ya sea de un continente o no.
+		if not conquistables:
+			continente = ''
+		else:
+			continente = conquistables[0]
+=
+		return {_top_limitrofes(tablero, continente)[0]: cantidad}
+
+	@staticmethod
+	def _top_limitrofes(tablero, continente = ''):
+		'''Devuelve una lista de todos mis paises del continente 
+		ordenados segun la cantidad de paises de ejercito 1 enemigos 
+		del continente a su alrededor. De no seleccionar continente, 
+		devolvera todos.'''
+		mis_paises: [pais for pais in tablero.paises(continente) if es_mi_pais(pais)]
+		
+		# Ordena la lista mis_paises según la cantidad de paises 
+		# limitrofes enemigos de 1 ejercito, de mayor a menor.
+		return sorted(mis_paises, key=lambda pais: len(
+			[limitrofe for limitrofe in tablero.paises_limitrofes(pais) if 
+			not es_mi_pais(pais) and tablero.ejercitos_pais(pais) == 1 and 
+			tablero.continente_pais(limitrofe) == continente]), reverse=True)
+
 	def quiero_agregar(self, tablero, pais):
 		""" Informa si el pais es una buena opcion para agregar ejercitos """
 		# Quiero agregar si algun pais vecino es enemigo
