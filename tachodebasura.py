@@ -65,6 +65,46 @@ Class TachoDeBasura(Jugador):
 			for pais in jugada_parcial:
 				jugada[pais] = jugada.get(pais, 0) + jugada_parcial[pais]
 		return jugada
+	
+	def don_galeroide(self, tablero, mis_paises_frontera):
+		""" Genera un diccionario con los paises propios como valor y una lista con
+		los puntos de ataque y defensa del mismo. A mayores puntos de ataque, mejor es
+		para conquistar paises, y a mayores puntos de defensa, mas critico es su estado
+		y mayor necesidad de refuerzos tiene para sobrevivir.
+		(Yu-Gi-Teg)
+		"""
+		ATAQUE = 0
+		DEFENSA = 1
+		puntajes = {}
+		
+		for pais in mis_paises_frontera:
+			puntajes[pais] = [0, 0]
+			# Un pais frontera con menos de 3 ejercitos es un riesgo
+			puntajes[pais][DEFENSA] = max(0, 3 - tablero.ejercitos_pais(pais))
+			
+			limitrofes_aliados = [limitrofe in tablero.paises_limitrofes(pais) if limitrofe in mis_paises_frontera]
+			limitrofes_enemigos = [limitrofe in tablero.paises_limitrofes(pais) if tablero.color_pais(limitrofe) != self.color]
+			if (len(limitrofes_aliados == 0)):
+				puntajes[pais][DEFENSA] += 1
+			
+			ejercitos_enemigos = sum(tablero.ejercitos_pais(limitrofe) for limitrofe in limitrofes_enemigos)
+			ejercitos_aliados = sum(tablero.ejercitos_pais(limitrofe) for limitrofe in limitrofes_aliados)
+			if (ejercitos_enemigos > tablero.ejercitos_pais(pais)): 
+				puntajes[pais][DEFENSA] += 1
+			else:
+				puntajes[pais][ATAQUE] += 1
+			if (ejercitos_enemigos > ejercitos_aliados + tablero.ejercitos_pais(pais)): puntajes[pais][DEFENSA] += 1
+			
+			for limitrofe_enemigo in limitrofes_enemigos:
+				if (tablero.ejercitos_pais(limitrofe_enemigo) < 3):
+					puntajes[pais][ATAQUE] += 13
+					
+			
+			
+			# _/\_ En desarrollo _/\_ 
+			
+			return puntajes
+		
 		
 	def establecer_prioridades_agregar(self, tablero, paises, ejercitos, continente):
 		""" Recibe una lista de paises, una cantidad de ejercitos y un continente
