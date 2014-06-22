@@ -19,11 +19,42 @@ class JugadorRegular(JugadorInteligente):
 	""" Tercer prototipo de un jugador inteligente.
 	"""
 	def __init__(self, color, nombre):
-		# Ver actualizar_personalidad
+		self.ronda = 0
+		self.orden_ronda = [] # Es buena practica no cambiar la clase de una variable.
+                # Estrategia (ver actualizar personalidad)
+
 		self.proba_aceptada = 0
 		self.caracter = 0
+
+		# inventario
+		self.tarjetas = {}
 		self.cantidad_canjes = 0
 		JugadorInteligente.__init__(self, color, nombre)
+	
+	def ronda_iniciada(self, tablero, ronda, orden_ronda):
+		"""Guarda los valores recibidos como parámetros, a ser usados por
+		el jugador en otras ocasiones.
+		"""
+
+                self.ronda = ronda
+                self.orden_ronda = orden_ronda
+
+	def tarjeta_usada(self, pais):
+		"""Esta funcion se llama cada vez que el jugador usa una tarjeta
+		para incorporar 2 ejercitos en un pais.
+		"""
+		# Este chequeo será inutil una vez q confirmemos que nunca ocurre.
+		if pais not in tarjetas:
+			raise ValueError("No la teniamos")
+		self.tarjetas[pais] = True
+
+	def tarjeta_recibida(self, pais):
+		"""Esta funcion se llama cada vez que el jugador recibe una tarjeta.
+		"""
+		# Este chequeo será inutil una vez q confirmemos que nunca ocurre.
+		if pais in tarjetas:
+			raise ValueError("Ya la teniamos")
+		self.tarjetas[pais] = False
 
 	def tarjetas_canjeadas(self, paises):
 		"""Esta funcion se llama cada vez que el jugador canjea
@@ -32,6 +63,8 @@ class JugadorRegular(JugadorInteligente):
 		Agrumentos:
 			paises: Lista de paises de las tarjetas canjeadas.
 		"""
+		for pais in paises:
+			self.tarjetas.pop(pais)
 		self.cantidad_canjes += 1		
 	
 	def actualizar_personalidad(self, tablero, paises_ganados_ronda=None):
@@ -60,6 +93,7 @@ class JugadorRegular(JugadorInteligente):
 			self.proba_aceptada = PA_NORMAL
 	
 	def agregar_ejercitos(self, tablero, cantidad):
+		""" Algo de documentación asi se ve verde y bonito. """
 		self.actualizar_personalidad(tablero)
 		
 		# Esto tiene el problema de que agrega ejercitos en bloque.
