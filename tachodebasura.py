@@ -66,13 +66,32 @@ Class TachoDeBasura(Jugador):
 				jugada[pais] = jugada.get(pais, 0) + jugada_parcial[pais]
 		return jugada
 	
-	def don_galeroide(self, tablero, mis_paises_frontera):
+	def ponderar_fronteras(self, tablero, mis_paises_frontera):
 		""" Genera un diccionario con los paises propios como valor y una lista con
 		los puntos de ataque y defensa del mismo. A mayores puntos de ataque, mejor es
 		para conquistar paises, y a mayores puntos de defensa, mas critico es su estado
 		y mayor necesidad de refuerzos tiene para sobrevivir.
 		(Yu-Gi-Teg)
 		"""
+		# Cosas que aumentan los puntos de ataque:
+		# - Paises limitrofes enemigos con menos de 3 ejercitos
+		# - Superioridad de ejercitos respecto al total de enemigos
+		# - Que pertenezca a un continente casi conquistado
+		# - 
+		# - 
+		# - 
+		# - 
+		
+		# Cosas que aumentan los puntos de defensa
+		# - Tener menos de 3 ejercitos
+		# - No tener aliados
+		# - Inferioridad respecto a los enemigos
+		# - Inferioridad respecto a los enemigos (Contando aliados)
+		# - Que el pais pertenezca a un continente conquistado
+		# - 
+		# - 
+		# - 
+		# - 
 		ATAQUE = 0
 		DEFENSA = 1
 		puntajes = {}
@@ -97,9 +116,14 @@ Class TachoDeBasura(Jugador):
 			
 			for limitrofe_enemigo in limitrofes_enemigos:
 				if (tablero.ejercitos_pais(limitrofe_enemigo) < 3):
-					puntajes[pais][ATAQUE] += 13
-					
+					puntajes[pais][ATAQUE] += 1
 			
+			if (tablero.continente_pais(pais) in self.continentes_conquistados):
+				puntajes[pais][DEFENSA] += 1
+			
+			if (self.cantidad_de_paises_restantes_para_conquistar_continente_completo(tablero, tablero.continente_pais(pais)) \
+					< tablero.cantidad_paises_continente()/2):
+				puntajes[pais][ATAQUE] += 1
 			
 			# _/\_ En desarrollo _/\_ 
 			
@@ -168,23 +192,29 @@ Class TachoDeBasura(Jugador):
 		else:
 			restantes = ejercitos
 			# Eleccion libre. Solo tengo paises frontera
-			# Agregado defensivo en continentes conquistados
-			for continente in self.continentes_conquistados:
-				paises_de_interes = [pais for pais in paises_candidatos if tablero.continente_pais(pais) == continente]
-				
-				# Prioridad maxima: Defender las entradas de los continentes con al menos 3
-				# ejercitos
-				for pais in paises_candidatos:
-					prioridades[pais] = max(0, min(restantes, 3-tablero.ejercitos_pais(pais)))
-					restantes -= prioridades[pais]
+			puntajes = self.ponderar_fronteras(tablero, paises_candidatos)
+			if (self.caracter == PER_CONQUISTADOR):
+				total = sum(puntos[ATAQUE] for puntos in puntajes.values())
+			elif (self.caracter == PER_DEFENSOR):
+				total = sum(puntos[DEFENSA] for puntos in puntajes.values())
+			elif (self.caracter == PER_NEUTRAL):
+				total = sum(puntos[ATAQUE] + puntos[DEFENSA] for puntos in puntajes.values())
+			else: raise ValueError()
 			
-			if (restantes > 0):
+			# Si tengo 10 ejercitos y el puntaje total es 100, agrego 0.1 ejercitos por punto
+			unidad_asignacion = total / float(ejercitos)
+			for pais in paises_candidatos:
 				if (self.caracter == PER_CONQUISTADOR):
-					# Pongo ejercitos en paises que limitan con otros conquistables
-					ejercitos_minimo = 1
-					while (restantes == 0):
+					ejercitos_agregar = int(round(unidad_asignacion * puntajes[pais][ATAQUE]))
 				elif (self.caracter == PER_DEFENSOR):
-					
+					ejercitos_agregar = int(round(unidad_asignacion * puntajes[pais][DEFENSA]))
 				elif (self.caracter == PER_NEUTRAL):
-					
+					ejercitos_agregar = int(round(unidad_asignacion * (puntajes[pais][ATAQUE] + puntajes[pais][DEFENSA])))
+				
+				if (ejercitos_agregar != 0):
+					prioridades[pais] = ejercitos_agregar
+					restantes -= ejercitos_agregar
+			
+			assert(restantes == 0)
+			
 			return prioridades
