@@ -37,7 +37,12 @@ class JugadorInteligente(Jugador):
 		if self.es_mi_pais(tablero, pais):
 			raise ValueError("Es mi pais!")
 		return self._limita_con(tablero, pais, self.es_frontera)
-	
+		
+'''	def es_peligroso(self, tablero, pais):
+		if not self.es_amenaza(tablero, pais):
+			raise ValueError("No es amenaza!")
+		for mipais in [mipais for mipais in tablero.paises_limitrofes(pais) if self.es_mi_pais(mipais) and proba.ataque(tablero.ejercitos_pais(pais),tablero.ejercitos_pais(mipais)) >= 0.3
+	'''
 	def es_frontera_unica(self, tablero, pais):
 		""" Devuelve True si el pais es frontera y 
 		no limita con ninguna otra.
@@ -85,3 +90,13 @@ class JugadorInteligente(Jugador):
 						continue
 					orden_proteccion[limitrofe] = min(orden_proteccion[limitrofe], orden_proteccion[pais]+1)
 		return orden_proteccion
+
+	def orden_minimo(self, tablero, paises, orden_proteccion):
+		""" Dada una lista de paises y un diccionario de orden de proteccion por pais, devuelve
+		el orden minimo y una lista de paises de ese orden."""
+		orden_minimo = min([orden_proteccion[pais] for pais in paises])
+		paises_orden_minimo = [pais for pais in paises if orden_proteccion[pais] == orden_minimo]
+		return orden_minimo, paises_orden_minimo
+
+	def victoria_segura(self, tablero): # Estoy viendo la forma de que juegue rapido la AI si ya gana seguro.
+		return len(tablero.paises_color(self.color)) >= 35 #Numero a modificar
