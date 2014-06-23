@@ -15,6 +15,12 @@ from probabilidad import proba
 # Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
 EXTRA_ORDEN2 = 2
 
+# Constantes para facil configuracion y correccion
+PER_DEFENSOR = 0
+PER_CONQUISTADOR = 1
+PA_NORMAL = 0.49
+PA_TARJETA_GANADA = 0.67
+		
 class JugadorRegular(JugadorInteligente):
 	""" Tercer prototipo de un jugador inteligente.
 	"""
@@ -44,7 +50,7 @@ class JugadorRegular(JugadorInteligente):
 		para incorporar 2 ejercitos en un pais.
 		"""
 		# Este chequeo sera inutil una vez q confirmemos que nunca ocurre.
-		if pais not in tarjetas:
+		if pais not in self.tarjetas:
 			raise ValueError("No la teniamos")
 		self.tarjetas[pais] = True
 
@@ -52,7 +58,7 @@ class JugadorRegular(JugadorInteligente):
 		"""Esta funcion se llama cada vez que el jugador recibe una tarjeta.
 		"""
 		# Este chequeo sera inutil una vez q confirmemos que nunca ocurre.
-		if pais in tarjetas:
+		if pais in self.tarjetas:
 			raise ValueError("Ya la teniamos")
 		self.tarjetas[pais] = False
 
@@ -72,14 +78,11 @@ class JugadorRegular(JugadorInteligente):
 		caracter de refuerzo ds paises y la
 		probabilidad de exito aceptada para afrontar un ataque.
 		"""
-		# Constantes para facil configuracion y correccion
-		PER_DEFENSOR = 0
-		PER_CONQUISTADOR = 1
-		PA_NORMAL = 0.49
-		PA_TARJETA_GANADA = 0.67
-		
 		# Hay que poner alguna condicion (Podria ser si va ganando)
-		if (True):
+		if (self.orden_ronda[-1] != self.color):
+			for color in self.orden_ronda[self.orden_ronda.index(self.color)::]:
+				amenazas_del_color = [pais for pais in tablero.paises_color(color) if self.es_amenaza(tablero, pais)]
+				for pais in amenazas_del_color:
 			self.caracter = PER_DEFENSOR
 		else:
 			self.caracter = PER_CONQUISTADOR
@@ -97,18 +100,53 @@ class JugadorRegular(JugadorInteligente):
 		self.actualizar_personalidad(tablero)
 		if self.ronda == 1:
 			return self._agregar_ejercitos_inicial(tablero, cantidad)
-		# Esto tiene el problema de que agrega ejercitos en bloque.
 		jugada = {}
+		# a continuacion agregados muy defensivos, pero que considero inevitables aun si uno quiere atacar.
 		for continente, cantidad_continente in sorted(cantidad.items(), reverse=True):
-			paises_posibles = tablero.paises(continente)
-			for i, pais in enumerate(paises_posibles):
-				if tablero.color_pais(pais) != self.color:
-					continue
-				# Si en todos da False, agrega en el ultimo
-				if i != len(paises_posibles) - 1 and not self.quiero_agregar(tablero, pais):
-					continue
-				jugada[pais] = jugada.get(pais, 0) + cantidad_continente
-				break
+			
+			# Dejamos el caso de ejercitos libres para otra funcion.
+			if continente == '':
+				continue
+			# Con el fin de agilizar una partida, atontar el jugador si ya gana seguro (poca confianza le tengo)
+			if self.victoria_segura(tablero):
+				pais_max = max(tablero.paises(continente), key=tablero.ejercitos_pais)
+				jugada[pais_max] = jugada.get(pais_max,0) + cantidad_continente
+				continue
+			
+			# Aqui determina para cada continente los paises de minimo orden,donde querrremos nuestros ejercitos
+			# (Pivote -pais de comunicacion entre fronteras- no implementado aun)
+			orden_proteccion = self.orden_proteccion(tablero)
+			orden_minimo,paises_orden_minimo = self.orden_minimo(tablero, tablero.paises(continente), orden_proteccion)
+			paises_posibles = paises_orden_minimo
+			
+			
+			ejercitos = cantidad_continente
+			i = 0 # Contador para ubicar ejercitos de manera cíclica.
+			if orden_minimo == 1: #Como queremos que agrupe en cualquier continente con fronteras
+			
+				while ejercitos:
+					# Este lambda determina para cada pais el ejercito enemigo mas fuerte que lo puede atacar.
+					ejercito_mas_poderoso = max([tablero.ejercitos_pais(limitrofe) for limitrofe in
+								  tablero.paises_limitrofes(paises_posibles[i%len(paises_posibles)])
+								  if self.es_enemigo(tablero, limitrofe) and self.es_amenaza(tablero, limitrofe)])
+					
+					# Elegiremos entonces agregar un ejercito en la frontera mas amenazada (No contempla ataque compuesto)
+					probabilidad_de_morir = lambda pais: proba.ataque(ejercito_mas_poderoso,tablero.ejercitos_pais(pais))
+					pais_elegido = max(paises_posibles, key=probabilidad_de_morir)
+					jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
+					ejercitos -= 1
+					i += 1
+					
+			else: # Como queremos que agregue si no hay fronteras.
+			
+				while ejercitos:
+					# Elige el pais de orden minimo con menos ejercitos y le da uno.
+					pais_elegido = min(paises_posibles, key=tablero.ejercitos_pais)
+					jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
+					ejercitos -= 1
+					i += 1
+
+		self._agregar_ejercitos_libres(tablero, cantidad[''], jugada)
 		return jugada
 		
 	def _agregar_ejercitos_inicial(self, tablero, cantidad):
@@ -117,7 +155,7 @@ class JugadorRegular(JugadorInteligente):
 		# Esta lista de continentes esta ordenada segun la prioridad (cual conviene mas).
 		continentes = ['Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte', 'Asia'] 
 		conquistables = list(continentes)
-		if cantidad[continente] == 3:
+		if cantidad[''] == 3:
 			precaucion = 2
 		else:			# Numero de ejercitos permitidos q pueden tener los rivales del continente.
 			precaucion = 1
@@ -125,20 +163,44 @@ class JugadorRegular(JugadorInteligente):
 		for continente in continentes:
 			# Chequea si un continente puede ser conquistado en 1 turno.
 			for pais in tablero.paises(continente):
-				if not ( self.es_mi_pais(tablero, pais) or (self.es_amenaza(tablero, pais) 
-				and tablero.ejercitos_pais(pais) >= precaucion) ):
-					conquistables.pop(continente)
-		
-		# Devolvera el pais con mas limitrofes enemigos de ej. 1 que encuentre,
-		# ya sea de un continente o no.
+				es_mi_pais = self.es_mi_pais(tablero, pais)
+				esta_defendido = tablero.ejercitos_pais(pais) > precaucion
+				if not (es_mi_pais or (self.es_amenaza(tablero, pais) and not esta_defendido)):
+					conquistables.pop(conquistables.index(continente))
+		# Agregaremos en el mejor continente que haya pasado las condiciones. 
+		# Si no hay ninguno, agregamos en el país con mas limites enemigos de ejercito 1 que tengamos.
 		if not conquistables:
 			continente = ''
 		else:
 			continente = conquistables[0]
 		jugada = {}
-		jugada[self._top_limitrofes(tablero, continente)[0]] = cantidad[continente]
+		jugada[self._top_limitrofes(tablero, continente)[0]] = cantidad['']
 		return jugada
-		
+
+	def _agregar_ejercitos_libres(self, tablero, cantidad, jugada):
+		'''Agregara los ejercitos libres'''
+		if self.victoria_segura(tablero):
+			pais_max = max(tablero.paises_color(self.color), key=tablero.ejercitos_pais)
+			jugada[pais_max] = jugada.get(pais_max,0) + cantidad
+			return
+
+		if True: #self.caracter == PE_CONQUISTADOR (esto deberia hacerlo solo si quiere atacar: Asi no agrega ejercitos previniendo un agregado ofensivo del rival.
+			limitrofe_mas_debil = lambda pais: min([limitrofe for limitrofe in tablero.paises_limitrofes(pais) if not self.es_mi_pais(tablero, limitrofe)],key=tablero.ejercitos_pais)
+			# paises_agregables devuelve todos los paises en los que la probabilidad de atacar al mas debil no sea aceptada.
+			paises_agregables = [pais for pais in tablero.paises_color(self.color) if self.es_frontera(tablero, pais) and
+					     proba.ataque(tablero.ejercitos_pais(pais), tablero.ejercitos_pais(limitrofe_mas_debil(pais))) < self.proba_aceptada]
+			if paises_agregables == []:
+				paises_agregables == [pais for pais in tablero.paises_color(self.color) if self.es_frontera(tablero, pais)]
+
+			if paises_agregables == []:
+				paises_agregables == tablero.paises_color(self.color)
+			print paises_agregables
+			
+			while cantidad:
+				pais_elegido = max(paises_agregables, key=lambda pais: proba.ataque(tablero.ejercitos_pais(pais), tablero.ejercitos_pais(
+					limitrofe_mas_debil(pais))))
+				jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
+				cantidad -= 1
 
 	def _top_limitrofes(self, tablero, continente = ''):
 		'''Devuelve una lista de todos mis paises del continente 
@@ -153,6 +215,9 @@ class JugadorRegular(JugadorInteligente):
 			[limitrofe for limitrofe in tablero.paises_limitrofes(pais) if 
 			not self.es_mi_pais(tablero, pais) and tablero.ejercitos_pais(pais) == 1 and 
 			tablero.continente_pais(limitrofe) == continente]), reverse=True)
+
+		
+		return sorted(mis_paises, key=cant_limitrofes_inofensivos, reverse=True)
 
 	def quiero_agregar(self, tablero, pais):
 		""" Informa si el pais es una buena opcion para agregar ejercitos """
