@@ -194,8 +194,7 @@ class JugadorRegular(JugadorInteligente):
 
 			if paises_agregables == []:
 				paises_agregables == tablero.paises_color(self.color)
-			print paises_agregables
-			
+
 			while cantidad:
 				pais_elegido = max(paises_agregables, key=lambda pais: proba.ataque(tablero.ejercitos_pais(pais), tablero.ejercitos_pais(
 					limitrofe_mas_debil(pais))))
