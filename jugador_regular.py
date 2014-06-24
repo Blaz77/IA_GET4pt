@@ -74,7 +74,7 @@ class JugadorRegular(JugadorInteligente):
 			self.tarjetas.pop(pais)
 		self.cantidad_canjes += 1		
 	
-	def actualizar_personalidad(self, tablero, paises_ganados_ronda=None):
+	def actualizar_personalidad(self, tablero, paises_ganados_ronda=[]):
 		""" Usa toda la informacion que puede para determinar el
 		caracter de refuerzo ds paises y la
 		probabilidad de exito aceptada para afrontar un ataque.
@@ -93,7 +93,7 @@ class JugadorRegular(JugadorInteligente):
 			# Punto intermedio
 			self.caracter = PER_NEUTRAL
 		
-		if (paises_ganados_ronda is None): return
+		if not paises_ganados_ronda: return
 		
 		# Lo siguiente se usa solo cuando es llamado por atacar()
 		if (len(paises_ganados_ronda) >= 2 or (len(paises_ganados_ronda) == 1 and \
@@ -271,8 +271,8 @@ class JugadorRegular(JugadorInteligente):
 			# Un pais frontera con menos de 3 ejercitos es un riesgo
 			puntajes[pais][DEFENSA] = max(0, 3 - tablero.ejercitos_pais(pais))
 			
-			limitrofes_aliados = [limitrofe in tablero.paises_limitrofes(pais) if limitrofe in mis_paises_frontera]
-			limitrofes_enemigos = [limitrofe in tablero.paises_limitrofes(pais) if tablero.color_pais(limitrofe) != self.color]
+			limitrofes_aliados = [limitrofe for limitrofe in tablero.paises_limitrofes(pais) if limitrofe in mis_paises_frontera]
+			limitrofes_enemigos = [limitrofe for limitrofe in tablero.paises_limitrofes(pais) if tablero.color_pais(limitrofe) != self.color]
 			if (len(limitrofes_aliados == 0)):
 				puntajes[pais][DEFENSA] += 1
 			
@@ -309,13 +309,13 @@ class JugadorRegular(JugadorInteligente):
 		orden_proteccion = self.orden_proteccion(tablero)
 		orden_minimo, paises_candidatos = self.orden_minimo(tablero, paises, orden_proteccion)
 		
-		prioridades {}
+		prioridades = {}
 		if (orden_minimo >= 2):
 			# Esta situacion solo es posible si el continente esta totalmente conquistado
 			# y no posee ningun pais frontera
 			for pais in paises_candidatos:
 				prioridades[pais] = ejercitos / len(paises_candidatos)
-			for sobrante in xrange(ejercitos % len(paises_candidatos):
+			for sobrante in xrange(ejercitos % len(paises_candidatos)):
 				prioridades[paises_candidatos[sobrante]] += 1
 			return prioridades
 		elif (continente != ""):
@@ -385,7 +385,7 @@ class JugadorRegular(JugadorInteligente):
 			
 			return prioridades
 	
-	def cantidad_paises_restantes_para_conquistar_continente(self, tablero, continente)
+	def cantidad_paises_restantes_para_conquistar_continente(self, tablero, continente):
 		""" Calcula la cantidad de paises restantes para conquistar el
 		continente completo. Si es totalmente propio, devuelve 0.
 		"""
