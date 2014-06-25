@@ -131,21 +131,9 @@ class JugadorRegular(JugadorInteligente):
 			
 			ejercitos = cantidad_continente
 			i = 0 # Contador para ubicar ejercitos de manera cíclica.
-			if orden_minimo == 1: #Como queremos que agrupe en cualquier continente con fronteras
 			
-				while ejercitos:
-					# Este lambda determina para cada pais el ejercito enemigo mas fuerte que lo puede atacar.
-					ejercito_mas_poderoso = max([tablero.ejercitos_pais(limitrofe) for limitrofe in
-								  tablero.paises_limitrofes(paises_posibles[i%len(paises_posibles)])
-								  if self.es_enemigo(tablero, limitrofe) and self.es_amenaza(tablero, limitrofe)])
-					
-					# Elegiremos entonces agregar un ejercito en la frontera mas amenazada (No contempla ataque compuesto)
-					probabilidad_de_morir = lambda pais: proba.ataque(ejercito_mas_poderoso,tablero.ejercitos_pais(pais))
-					pais_elegido = max(paises_posibles, key=probabilidad_de_morir)
-					jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
-					ejercitos -= 1
-					i += 1
-					
+			if orden_minimo == 1:  self._agregar_en_fronteras(tablero, jugada, paises_posibles, ejercitos)
+				
 			else: # Como queremos que agregue si no hay fronteras.
 			
 				while ejercitos:
@@ -158,6 +146,44 @@ class JugadorRegular(JugadorInteligente):
 		self._agregar_ejercitos_libres(tablero, cantidad[''], jugada)
 		return jugada
 		
+		
+	def _agregar_en_fronteras(self, tablero, agregados, paises_frontera, ejercitos):
+
+		# Asigna para cada pais frontera el mas poderoso ejercito compuesto limitrofe. Es decir,
+		# si un contrincante decidiera atacar a ese pais con todos sus ejercitos y los tiene distribuidos,
+		# el equivalente aproximado a si los tuviera todos en un solo pais.
+		amenaza_mas_poderosa = {pais: (1 + max((sum((tablero.ejercitos_pais(limitrofe)-1 
+								for limitrofe in tablero.paises_limitrofes(pais) 
+									if tablero.color_pais(limitrofe) == color)) 
+						for color in self.ronda 
+							if color != self.color))) 
+					for pais in paises_frontera}
+		
+		# Esto de aca arriba es una optimizacion de:
+		#
+		# amenaza_mas_poderosa: {}
+		# for pais in paises_frontera:
+		#	ejercitos_agrupados_por_color = []
+		#	for color in self.ronda:
+		#		if color != self.color:
+		#			for limitrofe in tablero.paises_limitrofes(pais):
+		#				ejercitos_del_color = []
+		#				if tablero.color_pais(limitrofe) == color:
+		#					ejercitos_del_color.append(tablero.ejercitos_pais(limitrofe) - 1)
+		#				ejercitos_agrupados_por_color.append(sum(ejercitos_del_color))
+		#	amenaza_mas_poderosa[pais] = max(ejercitos_agrupados_por_color) + 1
+
+		# Elegiremos entonces agregar un ejercito en la frontera mas amenazada.
+		probabilidad_de_morir = lambda pais: proba.ataque(amenaza_mas_poderosa[pais],tablero.ejercitos_pais(pais)+agregados.get(pais, 0))
+		pais_elegido = lambda: max(paises_posibles, key=probabilidad_de_morir)
+		agregar_a_pais_elegido = lambda: agregados.update([(pais_elegido(), agregados.get(pais_elegido(), 0) + 1)
+		
+		# Y aca se produce el bucle: Se fija quien esta mas en peligro, le agrega uno, vuelve a fijarse, y asi sucesivamente.
+		# Repite algo de trabajo pero como usa una lista por comprension, imagino q es mas rapido q un for.
+		[agregar_a_pais_elegido() for x in xrange(ejercitos)]
+		return
+
+
 	def _agregar_ejercitos_inicial(self, tablero, cantidad):
 		"""Cantidad sera 5 o 3 en el modo clasico."""
 		
@@ -186,7 +212,10 @@ class JugadorRegular(JugadorInteligente):
 		else:
 			continente = conquistables[0]
 		jugada = {}
-		jugada[self._top_limitrofes_debiles(tablero, continente)[0]] = cantidad
+		top_limitrofes_debiles = self.top_limitrofes_debiles(tablero, precaucion, continente)
+		if not top_limitrofes_debiles:
+			pais_elegido: 
+		jugada[top_limitrofes_debiles[0]] = cantidad
 		return jugada
 
 	def _agregar_ejercitos_libres(self, tablero, cantidad, jugada):
@@ -213,7 +242,7 @@ class JugadorRegular(JugadorInteligente):
 				jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
 				cantidad -= 1
 
-	def _top_limitrofes_debiles(self, tablero, continente = ''):
+	def _top_limitrofes_debiles(self, tablero, precaucion, continente = ''):
 		'''Devuelve una lista de todos mis paises del continente 
 		ordenados segun la cantidad de paises de ejercito 1 enemigos 
 		del continente a su alrededor. De no seleccionar continente, 
@@ -224,7 +253,7 @@ class JugadorRegular(JugadorInteligente):
 		# limitrofes enemigos de 1 ejercito, de mayor a menor.
 		return sorted(mis_paises, key=lambda pais: len(
 			[limitrofe for limitrofe in tablero.paises_limitrofes(pais) if 
-			not self.es_mi_pais(tablero, pais) and tablero.ejercitos_pais(pais) == 1 and 
+			not self.es_mi_pais(tablero, pais) and tablero.ejercitos_pais(pais) <= precaucion and 
 			tablero.continente_pais(limitrofe) == continente]), reverse=True)
 			
 	def agregar_ejercitos(self, tablero, cantidad):
@@ -457,13 +486,12 @@ class JugadorRegular(JugadorInteligente):
 		# Lleva la cuenta de los ejercitos disponibles para reagrupar de los
 		# paises involucrados en esta ronda (Para evitar el traslado de ejercitos
 		# en cadena)
-		ejercitos_reagrupables = {}
-		for pais in tablero.paises_color(self.color):
-			if tablero.ejercitos_pais(pais) > 1:
-				ejercitos_reagrupables[pais] = tablero.ejercitos_pais(pais) - 1
-				
+		ejercitos_reagrupables = {pais: (tablero.ejercitos_pais(pais) - 1)
+                                          for pais in tablero.paises_color(self.color)
+                                          if tablero.ejercitos_pais(pais) > 1}
+                                          
 		orden_proteccion = self.orden_proteccion(tablero)
-		for pais in ejercitos_reagrupables:
+		for pais in sorted(ejercitos_reagrupables.keys(), key=lambda pais: orden_proteccion[pais], reverse=True):
 			if orden_proteccion[pais] == 1:
 				continue
 			# Defino quienes van a ser los que reciban algo de este pais.
@@ -478,11 +506,18 @@ class JugadorRegular(JugadorInteligente):
 				ejercitos_a_enviar = max(ejercitos_a_enviar - EXTRA_ORDEN2, 0)
 				if not ejercitos_a_enviar:
 					continue
+			recibidos = {limitrofes: 0 for limitrofes in limitrofes_a_recibir}
+			
+			probabilidad_de_morir = lambda pais: proba.ataque(ejercito_mas_poderoso,tablero.ejercitos_pais(pais))
+				pais_elegido = max(paises_posibles, key=probabilidad_de_morir)
+				jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
+				ejercitos -= 1
+				i += 1
 
 			for limitrofe in limitrofes_a_recibir:
 				ejercitos_reagrupables[pais] -= ejercitos_a_enviar/len(limitrofes_a_recibir)
 				reagrupamientos.append( (pais, limitrofe, ejercitos_a_enviar/len(limitrofes_a_recibir)) )
-				tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+				#tablero.actualizar_interfaz(self.cambios(reagrupamientos)) alenta y rompe la interfaz texto
 
 			# Reparto los que sobraron.
 			ejercitos_restantes = ejercitos_a_enviar % len(limitrofes_a_recibir)
@@ -491,7 +526,7 @@ class JugadorRegular(JugadorInteligente):
 			for x in xrange(ejercitos_restantes):
 				ejercitos_reagrupables[pais] -= 1
 				reagrupamientos.append( (pais, limitrofes_a_recibir[x], 1) )
-				tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+				#tablero.actualizar_interfaz(self.cambios(reagrupamientos)) alenta y rompe la interfaz texto.
 			
 		# ACA ME FALTA IMPLEMENTAR QUE UNA FRONTERA LE PASE EJERCITOS A OTRA SI HACE FALTA PARA MAXIMIZAR LA SEGURIDAD.
 		return reagrupamientos
