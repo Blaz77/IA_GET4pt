@@ -54,16 +54,6 @@ class JugadorInteligente(Jugador):
 				for color in self.orden_ronda 
 					if color != self.color))
 
-		#optimixacion de:
-		#	ejercitos_agrupados_por_color = []
-		#	for color in self.ronda:
-		#		if color != self.color:
-		#			for limitrofe in tablero.paises_limitrofes(pais):
-		#				ejercitos_del_color = []
-		#				if tablero.color_pais(limitrofe) == color:
-		#					ejercitos_del_color.append(tablero.ejercitos_pais(limitrofe) - 1)
-		#				ejercitos_agrupados_por_color.append(sum(ejercitos_del_color))
-
 
 	@staticmethod #Para definir funciones que no utilizan al objeto.
 	def cambios(reagrupamientos):
