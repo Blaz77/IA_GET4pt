@@ -293,7 +293,7 @@ class oo00000o0 ( object ) :
     if self . jugador_es_ganador ( i1Ii ) :
      Interfaz . alertar ( 'Hay ganador!' , 'El jugador %s ha ganado el juego luego de %d rondas' % ( i1Ii , i1Iii1i1I ) )
      Interfaz . actualizar ( self . tablero )
-     return
+     return str(i1Ii) #Volver a poner return si vamos a entregar este modulo!
      if 53 - 53: II111iiii
      if 31 - 31: OoO0O00
    i1Iii1i1I += 1
