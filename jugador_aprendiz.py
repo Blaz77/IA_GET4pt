@@ -68,12 +68,12 @@ class JugadorAprendiz(JugadorInteligente):
 				for limitrofe in tablero.paises_limitrofes(pais):
 					if (limitrofe in mis_paises and orden_proteccion[pais] == 2):
 						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-1) )
-						tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+						#tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 						break
 			elif (orden_proteccion[pais] == 2 and tablero.ejercitos_pais(pais) > 10):
 				for limitrofe in tablero.paises_limitrofes(pais):
 					if (limitrofe in mis_paises and self.es_frontera(tablero, limitrofe)):
 						reagrupamientos.append( (pais, limitrofe, tablero.ejercitos_pais(pais)-10) )
-						tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+						#tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 						break
 		return reagrupamientos
