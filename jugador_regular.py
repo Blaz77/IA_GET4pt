@@ -4,7 +4,7 @@ from jugador_inteligente import JugadorInteligente
 from probabilidad import proba
 
 # Ejercitos (sin contar el obligatorio) a dejar en paises de orden 2.
-EXTRA_ORDEN2 = 2
+EXTRA_ORDEN2 = 1
 
 # Constantes para facil configuracion y correccion
 PER_DEFENSOR = 0
