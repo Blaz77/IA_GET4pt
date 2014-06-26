@@ -572,12 +572,12 @@ def desencadenar(valor):
         except:
                 raise ValueError("Recibio un valor no numerico!")
 
-def crear_base(nombre_archivo = ".base.csv"):
+def crear_base(nombre_archivo = "base.csv"):
         ''' Convierte los datos de nuestro archivo de 
         probabilidades calculadas a un diccionario y 
         lo devuelve.
         '''
-        if nombre_archivo not in [elem[2] for elem in os.walk(".")]:
+        if nombre_archivo not in [elem[2] for elem in list(os.walk("."))][0]:
         	_flushear_archivo()
         try:
                 archivo = open(nombre_archivo, "r")
@@ -615,7 +615,7 @@ def crear_base_condicional(nombre_archivo = "base_condicional.csv"):
         probabilidades calculadas a un diccionario y 
         lo devuelve.
         '''
-        if nombre_archivo not in [elem[2] for elem in os.walk(".")]:
+        if nombre_archivo not in [elem[2] for elem in list(os.walk("."))][0]:
         	_flushear_archivo_condicional()
         try:
                 archivo = open(nombre_archivo)
@@ -653,10 +653,10 @@ def actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabi
                 base[(atacante, atacado)] = {}
         base[(atacante, atacado)].update({(minatk, maxdef): probabilidad})
 
-def _crear_backup(nombre_archivo = ".base_BACKUP.csv"):
+def _crear_backup(nombre_archivo = "base_BACKUP.csv"):
         agregar_proba(nombre_archivo, "Atacante", "Atacado", "Probabilidad", "w")
 
-def _crear_backup_condicional(nombre_archivo = ".base_condicional_BACKUP.csv"):
+def _crear_backup_condicional(nombre_archivo = "base_condicional_BACKUP.csv"):
         agregar_proba_condicional(nombre_archivo, "Atacante", "Atacado", "Minatk", "Maxdef", "Probabilidad", "w")
 
 def _flushear_archivo():
