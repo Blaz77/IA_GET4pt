@@ -97,7 +97,7 @@ class JugadorInexperto(JugadorInteligente):
 				for limitrofe in limitrofes_a_recibir:
 					ejercitos_reagrupables[pais] -= ejercitos_a_enviar/len(limitrofes_a_recibir)
 					reagrupamientos.append( (pais, limitrofe, ejercitos_a_enviar/len(limitrofes_a_recibir)) )
-					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+					#tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 				
 				# Reparto los que sobraron.
 				ejercitos_restantes = ejercitos_a_enviar % len(limitrofes_a_recibir)
@@ -106,7 +106,7 @@ class JugadorInexperto(JugadorInteligente):
 				for x in xrange(ejercitos_restantes):
 					ejercitos_reagrupables[pais] -= 1
 					reagrupamientos.append( (pais, limitrofes_a_recibir[x], 1) )
-					tablero.actualizar_interfaz(self.cambios(reagrupamientos))
+					#tablero.actualizar_interfaz(self.cambios(reagrupamientos))
 					
 			orden_a_mover -= 1
 			
