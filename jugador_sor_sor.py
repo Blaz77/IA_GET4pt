@@ -1,4 +1,5 @@
 import csv
+import os
 
 from constantes import *
 from jugador import Jugador
@@ -571,11 +572,13 @@ def desencadenar(valor):
         except:
                 raise ValueError("Recibio un valor no numerico!")
 
-def crear_base(nombre_archivo = "./bases/base.csv"):
+def crear_base(nombre_archivo = ".base.csv"):
         ''' Convierte los datos de nuestro archivo de 
         probabilidades calculadas a un diccionario y 
         lo devuelve.
         '''
+        if nombre_archivo not in [elem[2] for elem in os.walk(".")]:
+        	_flushear_archivo()
         try:
                 archivo = open(nombre_archivo, "r")
                 archivo_csv = csv.reader(archivo)
@@ -607,11 +610,13 @@ def agregar_proba(nombre_archivo, atacante, atacado, probabilidad, escritura = "
 def actualizar_base(base, atacante, atacado, probabilidad):
         base[(atacante, atacado)] = probabilidad
 
-def crear_base_condicional(nombre_archivo = "./bases/base_condicional.csv"):
+def crear_base_condicional(nombre_archivo = "base_condicional.csv"):
         ''' Convierte los datos de nuestro archivo de 
         probabilidades calculadas a un diccionario y 
         lo devuelve.
         '''
+        if nombre_archivo not in [elem[2] for elem in os.walk(".")]:
+        	_flushear_archivo_condicional()
         try:
                 archivo = open(nombre_archivo)
                 archivo_csv = csv.reader(archivo)
@@ -648,17 +653,17 @@ def actualizar_base_condicional(base, atacante, atacado, minatk, maxdef, probabi
                 base[(atacante, atacado)] = {}
         base[(atacante, atacado)].update({(minatk, maxdef): probabilidad})
 
-def _crear_backup(nombre_archivo = "./bases/base_BACKUP.csv"):
+def _crear_backup(nombre_archivo = ".base_BACKUP.csv"):
         agregar_proba(nombre_archivo, "Atacante", "Atacado", "Probabilidad", "w")
 
-def _crear_backup_condicional(nombre_archivo = "./bases/base_condicional_BACKUP.csv"):
+def _crear_backup_condicional(nombre_archivo = ".base_condicional_BACKUP.csv"):
         agregar_proba_condicional(nombre_archivo, "Atacante", "Atacado", "Minatk", "Maxdef", "Probabilidad", "w")
 
 def _flushear_archivo():
-        _crear_backup(nombre_archivo = "./bases/base.csv")
+        _crear_backup(nombre_archivo = "base.csv")
 
 def _flushear_archivo_condicional():
-        _crear_backup_condicional("./bases/base_condicional.csv")
+        _crear_backup_condicional("base_condicional.csv")
 		
 class Probabilidad(object):
 	""" Coleccion de motores de probabilidades teoricas."""
@@ -714,10 +719,10 @@ class Probabilidad(object):
 		# Aqui, luego de realizar los calculos, agrega a la base de datos los resultados nuevos.
 		if minatk == 1 and maxdef == 0:
 			self._actualizar_base1(atacante, atacado, self.ultima_probabilidad)
-			agregar_proba("./bases/base.csv", atacante, atacado, self.ultima_probabilidad)
+			agregar_proba("base.csv", atacante, atacado, self.ultima_probabilidad)
 		else:
 			self._actualizar_base2(atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
-			agregar_proba_condicional("./bases/base_condicional.csv", atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
+			agregar_proba_condicional("base_condicional.csv", atacante, atacado, minatk, maxdef, self.ultima_probabilidad)
 		
 		# Devuelvo el elemento aqui mismo, quedando igual guardado en el atributo hasta un nuevo calculo.
 		return self.ultima_probabilidad
