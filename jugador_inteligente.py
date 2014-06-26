@@ -37,27 +37,33 @@ class JugadorInteligente(Jugador):
 		if self.es_mi_pais(tablero, pais):
 			raise ValueError("Es mi pais!")
 		return self._limita_con(tablero, pais, self.es_frontera)
-		
-'''	def es_peligroso(self, tablero, pais):
-		if not self.es_amenaza(tablero, pais):
-			raise ValueError("No es amenaza!")
-		for mipais in [mipais for mipais in tablero.paises_limitrofes(pais) if self.es_mi_pais(mipais) and proba.ataque(tablero.ejercitos_pais(pais),tablero.ejercitos_pais(mipais)) >= 0.3
-	'''
-	def es_frontera_unica(self, tablero, pais):
-		""" Devuelve True si el pais es frontera y 
-		no limita con ninguna otra.
-		"""
-		es_frontera = self.es_frontera(tablero, pais)
-		if not es_frontera:
-			return False
-		return not self._limita_con(tablero, pais, self.es_frontera)
-		
+
 	def es_seguro(self, tablero, pais):
 		""" Deuvelve True si el pais no puede 
 		ser atacado en el siguiente turno.
 		"""
 		orden_proteccion = self.orden_proteccion(tablero)
 		return orden_proteccion[pais] > 3
+
+	def rival_pais(self, tablero, pais):
+		"""Devuelve una composicion de los ejercitos
+		del mismo color que mas amenazan al pais."""
+		return 1 + max((sum((tablero.ejercitos_pais(limitrofe)-1 
+						for limitrofe in tablero.paises_limitrofes(pais) 
+							if tablero.color_pais(limitrofe) == color)) 
+				for color in self.orden_ronda 
+					if color != self.color))
+
+		#optimixacion de:
+		#	ejercitos_agrupados_por_color = []
+		#	for color in self.ronda:
+		#		if color != self.color:
+		#			for limitrofe in tablero.paises_limitrofes(pais):
+		#				ejercitos_del_color = []
+		#				if tablero.color_pais(limitrofe) == color:
+		#					ejercitos_del_color.append(tablero.ejercitos_pais(limitrofe) - 1)
+		#				ejercitos_agrupados_por_color.append(sum(ejercitos_del_color))
+
 
 	@staticmethod #Para definir funciones que no utilizan al objeto.
 	def cambios(reagrupamientos):
@@ -97,6 +103,3 @@ class JugadorInteligente(Jugador):
 		orden_minimo = min([orden_proteccion[pais] for pais in paises])
 		paises_orden_minimo = [pais for pais in paises if orden_proteccion[pais] == orden_minimo]
 		return orden_minimo, paises_orden_minimo
-
-	def victoria_segura(self, tablero): # Estoy viendo la forma de que juegue rapido la AI si ya gana seguro.
-		return len(tablero.paises_color(self.color)) >= 35 #Numero a modificar
