@@ -13,18 +13,19 @@ PER_NEUTRAL = 2
 PA_NORMAL = 0.49
 PA_TARJETA_GANADA = 0.61
 
-# Instancia unica de Probabilidad. Se puede compartir entre jugadores
-proba = Probabilidad()
-
-class JugadorInteligente(Jugador):
+class SorSor(Jugador):
 	"""
-	Este jugador va a ganar el torneo!
-
-	(Escribir codigo de aca para abajo)
+	SorSor, el traidor.
+	
+	No pertenece a ninguna faccion (ni Alanos ni Barbaros) sino que
+	ofrece su espada al mejor postor. Adquirio grandes conocimientos de
+	los eruditos de cada bando en paralelo.
+	(...Lucas es de la practica Alan y Emiliano de la practica Barbara.)
+	No cabe duda que su presencia sera muy determinante pero... ¿Para quien?
 	"""
 	
 	def __init__(self, color, nombre):
-		JugadorInteligente.__init__(self, color, nombre)
+		Jugador.__init__(self, color, nombre)
 		
 		self.ronda = 0
 		self.orden_ronda = []
@@ -36,6 +37,9 @@ class JugadorInteligente(Jugador):
 		# Inventario
 		self.tarjetas = {}
 		self.cantidad_canjes = 0
+
+		# Tablero
+		self.mis_continentes = []
 	
 	def ronda_iniciada(self, tablero, ronda, orden_ronda):
 		""" Guarda los valores recibidos como parametros, a ser usados por
@@ -111,6 +115,7 @@ class JugadorInteligente(Jugador):
 							if tablero.color_pais(limitrofe) == color)) 
 				for color in self.orden_ronda 
 					if color != self.color))
+		# Indentado en orden de faill lectura (for color if color for limitrofe if tablero...)
 	
 	def actualizar_personalidad(self, tablero, paises_ganados_ronda=[]):
 		""" Usa toda la informacion que puede para determinar el
@@ -133,8 +138,14 @@ class JugadorInteligente(Jugador):
 			self.proba_aceptada = PA_TARJETA_GANADA
 		else:
 			self.proba_aceptada = PA_NORMAL
+		
+		self.mis_continentes = []
+		continentes = ('Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte', 'Asia')
+		for continente in continentes:
+			if all((self.es_mi_pais(tablero, pais) for pais in tablero.paises(continente))):
+				self.mis_continentes.append(continente)
 
-	@staticmethod #Para definir funciones que no utilizan al objeto.
+	@staticmethod
 	def cambios(reagrupamientos):
 		"""Plagiado vilmente del TP3 y usado por el metodo 
 		reagrupar, modifica el diccionario de cambios a 
@@ -167,8 +178,9 @@ class JugadorInteligente(Jugador):
 		return orden_proteccion
 
 	def orden_minimo(self, tablero, paises, orden_proteccion):
-		""" Dada una lista de paises y un diccionario de orden de proteccion por pais, devuelve
-		el orden minimo y una lista de paises de ese orden."""
+		""" Dada una lista de paises y un diccionario de 
+		orden de proteccion por pais, devuelveel orden minimo 
+		y una lista de paises de ese orden."""
 		orden_minimo = min([orden_proteccion[pais] for pais in paises])
 		paises_orden_minimo = [pais for pais in paises if orden_proteccion[pais] == orden_minimo]
 		return orden_minimo, paises_orden_minimo
@@ -180,7 +192,8 @@ class JugadorInteligente(Jugador):
 		self.actualizar_personalidad(tablero, paises_ganados_ronda)
 		
 		mis_paises = (pais for pais in tablero.paises_color(self.color) if tablero.ejercitos_pais(pais) != 1)
-		for pais in sorted(mis_paises, key=tablero.ejercitos_pais):
+		for pais in sorted(mis_paises, key=tablero.ejercitos_pais): # Itera primero los de mas ejercitos
+			# Prioriza el limitrofe mas debil.
 			for limitrofe in sorted((li for li in tablero.paises_limitrofes(pais) if self.es_enemigo(tablero, li)), key=tablero.ejercitos_pais):
 				# Evaluacion de conveniencia usando probabilidades
 				if self.quiero_atacar(tablero, pais, limitrofe):
@@ -190,10 +203,10 @@ class JugadorInteligente(Jugador):
 	def quiero_atacar(self, tablero, origen, destino):
 		""" Informa si el pais de destino es una buena opcion para atacar.
 		Esto dependera de muchos factores:
-			Si tenemos suficientes paises para tomar tarjeta
-			Las probabilidades de conquistar el pais enemigo
-			Las probabilidades de hacerlo con ayuda aliada
-			El riesgo en que quedara nuestro pais a ataques enemigos
+			*Si tenemos suficientes paises para tomar tarjeta
+			*Las probabilidades de conquistar el pais enemigo
+			*Las probabilidades de hacerlo con ayuda aliada
+			*El riesgo en que quedara nuestro pais a ataques enemigos
 		"""
 		# Probabilidades de conquista tolerada de parte del enemigo en el peor casos
 		# de ataque
@@ -208,15 +221,17 @@ class JugadorInteligente(Jugador):
 		# Victoria muy probable, con el doble de ejercitos + 1
 		if atacante >= 2*atacado + 1:
 			return True
-
+		
+		# Considera si vale la pena hacer "sangrar" al oponente. Atacara mientras que no se considere en peligro si pierde.
 		if (atacante >= atacado and (proba.ataque(self.rival_pais(tablero, origen), atacante-3) < PROBA_INVERSA)):
 			return True
 
-		# Para los casos restantes se necesita ayuda externa
+		# Para los casos restantes se necesita ayuda externa: Ataque compuesto
 		paises_a_componer = [pais for pais in tablero.paises_limitrofes(destino) if self.es_mi_pais(tablero, pais) and pais != origen]
 		if not paises_a_componer: return False
 		
-		# Calculamos una probabilidad que no es exacta pero seguro es menor a la exacta.
+		# Calculamos una probabilidad que no es exacta pero 
+		# seguro es menor a la exacta de ganar con ataque compuesto
 		atacante += sum([max(tablero.ejercitos_pais(pais)-3,0) for pais in paises_a_componer])
 		if (atacante >= 2*atacado + 1):
 			return True
@@ -291,13 +306,15 @@ class JugadorInteligente(Jugador):
 		return reagrupamientos
 		
 	def agregar_ejercitos(self, tablero, cantidad):
+		"""Multiples formas de agregar segun la situacion de la partida."""
 		if self.ronda == 1:
 			return self._agregar_ejercitos_inicial(tablero, cantidad[""])
 			
 		self.actualizar_personalidad(tablero)
 			
 		jugada = {}
-		# a continuacion agregados muy defensivos, pero que considero inevitables aun si uno quiere atacar.
+		# Agregado continental. Son agregados muy defensivos, pero que considero 
+		# inevitables aun si uno quiere atacar.
 		for continente, cantidad_continente in sorted(cantidad.items(), reverse=True):
 			
 			# Dejamos el caso de ejercitos libres para otra funcion.
@@ -305,7 +322,6 @@ class JugadorInteligente(Jugador):
 				continue
 
 			# Aqui determina para cada continente los paises de minimo orden, donde querrremos nuestros ejercitos
-			# (Pivote -pais de comunicacion entre fronteras- no implementado aun)
 			orden_proteccion = self.orden_proteccion(tablero)
 			orden_minimo,paises_orden_minimo = self.orden_minimo(tablero, tablero.paises(continente), orden_proteccion)
 			paises_posibles = paises_orden_minimo
@@ -329,9 +345,9 @@ class JugadorInteligente(Jugador):
 		
 	def _agregar_ejercitos_inicial(self, tablero, cantidad):
 		"""Agregado inicial de ejercitos. Cantidad sera 5 o 3 en esta modalidad de TEG."""
-		precaucion = cantidad/2 + 1
-		conquistables = self._chequear_continentes_faciles(tablero, precaucion)
-		
+		precaucion = 1
+		continentes = ['Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte']
+		conquistables, paises_elegidos = self._chequear_continentes_faciles(tablero, precaucion)
 
 		# Este recibe un continente y devuelve una lista de tus paises en el.
 		mis_paises_en_ = lambda continente: [pais for pais in tablero.paises(continente) if self.es_mi_pais(tablero, pais)]
@@ -342,7 +358,7 @@ class JugadorInteligente(Jugador):
 		# Si no hay ninguno, agregamos en el pais con mas limites enemigos de ejercito 1 que tengamos.
 		if not conquistables: continente = ''
 		else: continente = max(conquistables, key=lambda continente:
-				       len(mis_paises_en_(continente))*5/len(tablero.paises(continente)))
+				       (len(mis_paises_en_(continente))*4/len(tablero.paises(continente))))
 
 		jugada = {}
 		top_limitrofes_debiles = self._top_limitrofes_debiles(tablero, precaucion, continente)
@@ -356,8 +372,9 @@ class JugadorInteligente(Jugador):
 	def _chequear_continentes_faciles(self, tablero, precaucion):
 		""" Devuelve una lista con los continentes conquistables en 1 turno ordenados del mejor al peor."""
 		# Esta lista de continentes esta ordenada segun la prioridad (cual conviene mas).
-		continentes = ['Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte', 'Asia'] 
+		continentes = ('Africa', 'Oceania', 'America del Sur', 'Europa', 'America del Norte') 
 		conquistables = []
+		paises_elegidos = []
 
 		# Este recibe un continente y devuelve una lista de tus paises en el.
 		mis_paises_en_ = lambda continente: [pais for pais in tablero.paises(continente) if self.es_mi_pais(tablero, pais)]
@@ -372,12 +389,15 @@ class JugadorInteligente(Jugador):
 			if len(mis_paises_en_(continente)) == len(tablero.paises(continente)):
 				continue
 			for pais in mis_paises_en_(continente):
-				if len(limitrofes_enemigos(pais)) + len(mis_paises_en_(continente)) == len(tablero.paises(continente)) and not(
-							[lim for lim in limitrofes_enemigos(pais) if tablero.ejercitos_pais(lim) > precaucion]):
+				ejercitos_limitrofes_enemigos = lambda pais: sum([tablero.ejercitos_pais(lim) for lim in limitrofes_enemigos(pais)])
+				
+				if len(limitrofes_enemigos(pais)) + len(mis_paises_en_(continente)) == len(tablero.paises(continente)) and (
+					not ejercitos_limitrofes_enemigos(pais) > precaucion *1.0/len(limitrofes_enemigos(pais))):
 					conquistables.append(continente)
+					paises_elegidos.append((pais,ejercitos_limitrofes_enemigos(pais)))
 					break
 			continue
-		return conquistables
+		return conquistables, paises_elegidos
 		
 	def _top_limitrofes_debiles(self, tablero, precaucion, continente = ''):
 		""" Devuelve una lista de todos mis paises del continente 
@@ -395,13 +415,34 @@ class JugadorInteligente(Jugador):
 			
 	def _agregar_ejercitos_libres(self, tablero, cantidad, jugada):
 		''' Agregara los ejercitos libres. Modifica el diccionario de jugada.'''
+		
+		# Preliminarmente, reforzara las fronteras continentales.
 		if self.caracter == PER_DEFENSOR:
 			esta_solo = lambda pais: all((not self.es_mi_pais(tablero, limitrofe) for limitrofe in tablero.paises_limitrofes(pais)))
-			paises_frontera = [pais for pais in tablero.paises_color(self.color) if self.es_frontera(tablero, pais) and not esta_solo(pais)]
+			es_frontera_continental = lambda pais: all((tablero.continente_pais(lim) == pais for lim in tablero.paises_limitrofes(pais)))
+			paises_frontera = [pais for pais in tablero.paises_color(self.color) if self.es_frontera(tablero, pais)
+					   and tablero.continente_pais(pais) in self.mis_continentes and not esta_solo(pais)]
 			if not paises_frontera:
-				paises_frontera = [pais for pais in tablero.paises_color(self.color) if self.es_frontera(tablero, pais)]
-			self._agregar_en_fronteras(tablero, jugada, paises_frontera, cantidad)
-		else: 
+				pass
+
+			while cantidad and any( ( pais for pais in paises_frontera if proba.ataque(self.rival_pais(tablero, pais), tablero.ejercitos_pais(pais) > 0.3))):
+				  self._agregar_en_fronteras(tablero, jugada, paises_frontera, 1)
+				  cantidad -= 1
+
+		if not cantidad: return
+		# Si sobran, evalua si algun continente esta capturable y lo ataca.
+                conquistables, paises_elegidos = self._chequear_continentes_faciles(tablero, cantidad/2)
+		if conquistables:
+			pais_elegido = paises_elegidos[0][0]
+			ejercitos_enemigos = paises_elegidos[0][1]
+			ejercitos_agregados = min(cantidad, 2 * ejercitos_enemigos + 1)
+			jugada[pais_elegido] = ejercitos_agregados
+			cantidad -= ejercitos_agregados
+
+		if not cantidad: return
+		
+		# Luego, agregara los sobrantes en paises buscando aumentar sus chances de conquista.
+		else:
 			limitrofe_mas_debil = lambda pais: min([limitrofe for limitrofe in tablero.paises_limitrofes(pais) if not self.es_mi_pais(tablero, limitrofe)],key=tablero.ejercitos_pais)
 
 			# paises_agregables devuelve todos los paises en los que la probabilidad de atacar al mas debil no sea aceptada.
@@ -413,8 +454,8 @@ class JugadorInteligente(Jugador):
 			while cantidad:
 				# El pais elegido sera el que quede con mejor probabilidad luego de agregar.
 				pais_elegido = max(paises_agregables, key=lambda pais:
-							proba.ataque(tablero.ejercitos_pais(pais) + jugada.get(pais, 0),
-							1 + tablero.ejercitos_pais(limitrofe_mas_debil(pais))))
+							proba.ataque(tablero.ejercitos_pais(pais) + jugada.get(pais, 0) + 1,
+							tablero.ejercitos_pais(limitrofe_mas_debil(pais))))
 				jugada[pais_elegido] = jugada.get(pais_elegido, 0) + 1
 				cantidad -= 1
 	
@@ -695,4 +736,7 @@ class Probabilidad(object):
 		""" Devuelve el resultado del ultimo calculo de probabilidad.
 		"""
 		return self.ultima_probabilidad
-	
+
+# Instancia unica de Probabilidad. Se puede compartir entre jugadores
+proba = Probabilidad()
+
