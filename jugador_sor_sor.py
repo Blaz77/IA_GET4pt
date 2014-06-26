@@ -92,21 +92,6 @@ class SorSor(Jugador):
 		True si limita con algun pais enemigo.
 		"""
 		return self._limita_con(tablero, pais, self.es_enemigo)
-	
-	def es_amenaza(self, tablero, pais):
-		""" Recibe un pais enemigo, devuelve True 
-		si limita con alguno de los paises aliados.
-		"""
-		if self.es_mi_pais(tablero, pais):
-			raise ValueError("Es mi pais!")
-		return self._limita_con(tablero, pais, self.es_frontera)
-
-	def es_seguro(self, tablero, pais):
-		""" Deuvelve True si el pais no puede 
-		ser atacado en el siguiente turno.
-		"""
-		orden_proteccion = self.orden_proteccion(tablero)
-		return orden_proteccion[pais] > 3
 
 	def rival_pais(self, tablero, pais):
 		"""Devuelve una composicion de los ejercitos
@@ -120,7 +105,7 @@ class SorSor(Jugador):
 	
 	def actualizar_personalidad(self, tablero, paises_ganados_ronda=[]):
 		""" Usa toda la informacion que puede para determinar el
-		caracter de refuerzo ds paises y la
+		caracter de refuerzo de paises y la
 		probabilidad de exito aceptada para afrontar un ataque.
 		"""
 		if (self.orden_ronda[0] == self.color):
@@ -159,9 +144,10 @@ class SorSor(Jugador):
 		return cambios
 
 	def orden_proteccion(self, tablero):
-		""" Devuelve un diccionario con tus paises 
-		de clave y la cantidad de paises que 
-		lo protegen (incluyendose) como valor.
+		""" Devuelve un diccionario con tus paises de clave y la 
+		cantidad de paises que lo protegen (incluyendose) como valor.
+		Ejemplo: Si un jugador posee unicamente Africa: Etiopia y 
+		Egipto seran orden 1, Madagascar y Zaire, orden 2, y Sudafrica orden 3.
 		"""
 		orden_proteccion = {}
 		paises = tablero.paises_color(self.color)
@@ -180,7 +166,7 @@ class SorSor(Jugador):
 
 	def orden_minimo(self, tablero, paises, orden_proteccion):
 		""" Dada una lista de paises y un diccionario de 
-		orden de proteccion por pais, devuelveel orden minimo 
+		orden de proteccion por pais, devuelve el orden minimo 
 		y una lista de paises de ese orden."""
 		orden_minimo = min([orden_proteccion[pais] for pais in paises])
 		paises_orden_minimo = [pais for pais in paises if orden_proteccion[pais] == orden_minimo]
