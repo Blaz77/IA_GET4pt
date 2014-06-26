@@ -88,7 +88,6 @@ class JugadorRegular(JugadorInteligente):
 			self.proba_aceptada = PA_NORMAL
 	
 	def agregar_ejercitos(self, tablero, cantidad):
-		""" . """
 		if self.ronda == 1:
 			return self._agregar_ejercitos_inicial(tablero, cantidad[""])
 			

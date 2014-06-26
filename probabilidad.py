@@ -72,31 +72,11 @@ class Probabilidad(object):
 		if (atacante, atacado) not in self.base2:
 			self.base2[(atacante, atacado)] = {}
 		self.base2[(atacante, atacado)].update({(minatk, maxdef): probabilidad})
-	
-	def ataque_doble(self, atacante, atacado, minatk = 1, maxdef = 0, atk2 = 1, minatk2 = 1):
-		"""Calcula la probabilidad de conquistar un pais si lo atacamos de a 2."""
-		#NO ESTA TESTEADO! Poco confiable, no usar.
-		self.ultima_probabilidad = self.ataque(atacante, atacado, minatk, maxdef)
-		for i in range(atacado - maxdef):
-			j = i + 1
-			self.ultima_probabilidad += (1 - self.ultima_probabilidad) * self.ataque(atk2, atacado, minatk2, maxdef)
-		return self.ultima_probabilidad
-		
-	def ataque_doble2(self, atacante1, atacante2, atacado, minatk1 = 1, minatk2 = 1, maxdef = 0):
-		"""Calcula la probabilidad de conquistar un pais si lo atacamos de a 2."""
-		#NO ESTA TESTEADO! Poco confiable, no usar.
-		# Lo duplico por las dudas de que no ande
-		self.ultima_probabilidad = self.ataque(atacante1, atacado, minatk1, atacado/2 - maxdef)
-		self.ultima_probabilidad += self.ataque(atacante2, atacado, minatk2, atacado/2 - maxdef)
-		self.ultima_probabilidad /= 2
-		
-		return self.ultima_probabilidad
 
 	def ver_ultimo_calculo(self):
 		""" Devuelve el resultado del ultimo calculo de probabilidad.
 		"""
 		return self.ultima_probabilidad
 
-# Este de aca esta para hacer pruebas en terminal mas rapido, despues lo borro.
-# Correccion. Demasiado conveniente cargar el objeto una sola vez como para borrar esta preciosa linea de aca abajo.
+# Instancia unica de Probabilidad. Se puede compartir entre jugadores
 proba = Probabilidad()
